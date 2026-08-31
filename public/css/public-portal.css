@@ -1,0 +1,167 @@
+/* ============================================================
+   Public Portal — Bootstrap 5 complementary styles
+   ============================================================ */
+
+/* Accessibility bar */
+.accessibility-bar {
+    background: #f1f3f4;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Navbar */
+.public-navbar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.public-navbar .navbar-brand {
+    color: var(--text);
+}
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 1.25rem;
+}
+
+.brand-name {
+    color: var(--text);
+}
+
+.brand-sub {
+    color: var(--text-muted);
+}
+
+.public-navbar .nav-link {
+    color: var(--text);
+    font-weight: 500;
+    border-radius: 0.375rem;
+}
+
+.public-navbar .nav-link:hover,
+.public-navbar .nav-link.active {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    padding: 2.5rem 0 1.5rem;
+}
+
+.hero h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.hero p {
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Service tiles */
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1rem;
+}
+
+.service-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.75rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    text-decoration: none;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    min-height: 190px;
+    justify-content: center;
+}
+
+.service-tile:hover {
+    text-decoration: none;
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.service-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-bottom: 0.9rem;
+    color: var(--primary-dark);
+}
+
+.service-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.service-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Footer */
+.public-footer {
+    background: #2d3436;
+    color: #dfe6e9;
+}
+
+.footer-bottom {
+    background: #1e272e;
+}
+
+/* Emergency button - one-click panic */
+.emergency-button-fixed {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 999;
+}
+
+.emergency-button {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(217,48,37,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+    text-decoration: none;
+}
+
+.emergency-button:hover {
+    color: #fff;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(217,48,37,0.5); }
+    70% { box-shadow: 0 0 0 14px rgba(217,48,37,0); }
+    100% { box-shadow: 0 0 0 0 rgba(217,48,37,0); }
+}

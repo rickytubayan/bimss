@@ -1,0 +1,122 @@
+/* ============================================================
+   BIMS Theme — complements Bootstrap 5
+   ============================================================ */
+
+:root {
+    --primary: #1a73e8;
+    --primary-dark: #1557b0;
+    --primary-light: #e8f0fe;
+    --success: #1e8e3e;
+    --warning: #f9ab00;
+    --danger: #d93025;
+    --text: #202124;
+    --text-muted: #5f6368;
+    --bg: #ffffff;
+    --bg-alt: #f8f9fa;
+    --border: #dadce0;
+    --shadow: 0 1px 3px rgba(60,64,67,0.3);
+    --shadow-lg: 0 4px 12px rgba(60,64,67,0.2);
+    --font-base: 16px;
+    --font-scale: 1;
+    --bs-primary: #1a73e8;
+}
+
+html {
+    font-size: calc(var(--font-base) * var(--font-scale));
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Focus visibility */
+:focus-visible {
+    outline: 3px solid var(--primary) !important;
+    outline-offset: 2px;
+}
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    z-index: 10000;
+    border-radius: 0.375rem;
+}
+
+.skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+}
+
+/* TTS reader */
+.tts-reader {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--primary-dark);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    z-index: 9999;
+    display: none;
+}
+
+.tts-reader.active {
+    display: block;
+}
+
+/* Utility helpers */
+.text-muted-2 { color: var(--text-muted); }
+
+/* Cards */
+.card { box-shadow: var(--shadow); border-color: var(--border); }
+.card-header { font-weight: 600; }
+
+/* Tables */
+.table th {
+    background: var(--bg-alt);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+}
+
+/* Avatar */
+.avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Badges using Bootstrap buttons look */
+.badge-blue { background: var(--primary-light); color: var(--primary-dark); }
+.badge-green { background: #e6f4ea; color: #137333; }
+.badge-red { background: #fce8e6; color: #c5221f; }
+.badge-yellow { background: #fef7e0; color: #8a6d00; }
+.badge-gray { background: var(--bg-alt); color: var(--text-muted); }

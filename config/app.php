@@ -1,0 +1,26 @@
+<?php
+return [
+    'name' => 'BIMS',
+    'full_name' => 'Barangay Information Management System',
+    'version' => '1.0.0',
+    'url' => 'http://localhost/BIMSS',
+    'admin_url' => 'http://localhost/BIMSS/admin',
+    'public_url' => 'http://localhost/BIMSS',
+    'api_url' => 'http://localhost/BIMSS/api',
+    'timezone' => 'Asia/Manila',
+    'locale' => 'en',
+    'supported_languages' => ['en', 'fil', 'bis', 'ilc', 'bic'],
+    'upload_path' => __DIR__ . '/../public/uploads',
+    'max_upload_size' => 5242880,
+    'session_lifetime' => 7200,
+    'pagination_per_page' => 20,
+    'otp_expiry_minutes' => 10,
+    'otp_length' => 6,
+    'barangay' => [
+        'name' => '',
+        'code' => '',
+        'municipality' => '',
+        'province' => '',
+        'region' => '',
+    ],
+];

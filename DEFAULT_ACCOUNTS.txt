@@ -1,0 +1,28 @@
+BIMS - DEFAULT USER ACCOUNTS
+================================
+
+ALL ACCOUNTS USE THE DEFAULT PASSWORD: Admin@12345
+
+Email                     | Username   | Role           | Access
+--------------------------|------------|----------------|--------------------------------
+admin@bims.local          | admin      | Captain        | Full admin access
+captain@bims.local        | captain    | Captain        | Full admin access
+secretary@bims.local      | secretary  | Secretary      | Documents, certificates, records
+treasurer@bims.local      | treasurer  | Treasurer      | Finance, budget, tax
+
+LOGIN URLS
+================================
+Public home page : http://localhost/BIMSS/
+Admin panel      : http://localhost/BIMSS/admin/dashboard
+Public login     : http://localhost/BIMSS/auth/login
+Register         : http://localhost/BIMSS/auth/register
+OTP login        : http://localhost/BIMSS/auth/otp
+
+NOTES
+================================
+- Passwords are stored as bcrypt hashes (never plain text).
+- To change a user's password, regenerate a bcrypt hash:
+  php -r "echo password_hash('NEWPASSWORD', PASSWORD_BCRYPT);"
+  then update the password_hash value in the users table.
+- Forgot password / additional accounts: manage under
+  Admin > Settings > Users (once that module is built).

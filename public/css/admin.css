@@ -1,0 +1,146 @@
+/* ============================================================
+   Admin Panel — Bootstrap 5 complementary styles
+   ============================================================ */
+
+body {
+    background: var(--bg-alt);
+}
+
+.wrapper {
+    min-height: 100vh;
+}
+
+/* Offcanvas sidebar */
+.admin-offcanvas {
+    width: 280px !important;
+    background: #1e272e !important;
+    color: #a4b0be;
+}
+
+.admin-sidebar-head {
+    background: #161d23;
+    color: #fff;
+    border-bottom: 1px solid #2d3436;
+}
+
+.admin-sidebar-body {
+    color: #a4b0be;
+}
+
+.admin-sidebar-nav .sidebar-section {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #636e72;
+}
+
+.admin-sidebar-nav .nav-link {
+    color: #a4b0be;
+    border-radius: 0;
+    padding: 0.65rem 1.25rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-left: 3px solid transparent;
+}
+
+.admin-sidebar-nav .nav-link:hover {
+    background: #2d3436;
+    color: #fff;
+}
+
+.admin-sidebar-nav .nav-link.active {
+    background: #2d3436;
+    color: #fff;
+    border-left-color: var(--primary);
+}
+
+.admin-sidebar-nav .sidebar-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 1.05rem;
+}
+
+.admin-sidebar-foot {
+    border-top: 1px solid #2d3436;
+}
+
+/* Topbar */
+.admin-topbar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    min-height: 64px;
+}
+
+/* Content */
+.admin-content {
+    background: var(--bg-alt);
+    min-height: calc(100vh - 64px);
+}
+
+/* Stats cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.stat-icon.blue { background: var(--primary-light); }
+.stat-icon.green { background: #e6f4ea; }
+.stat-icon.red { background: #fce8e6; }
+.stat-icon.yellow { background: #fef7e0; }
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Table action buttons */
+.table-actions {
+    display: flex;
+    gap: 0.35rem;
+}
+
+/* Page header */
+.page-header {
+    margin-bottom: 1.25rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.page-subtitle {
+    color: var(--text-muted);
+}
