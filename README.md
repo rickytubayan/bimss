@@ -154,9 +154,35 @@ Currently implemented/skeleton:
 | Module | Status |
 |--------|--------|
 | Core framework, Auth, RBAC | ✅ Done |
-| Layouts, CSS, accessibility JS | ✅ Done |
-| Residents, Households, Documents, Finance, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Layouts, CSS (Bootstrap 5), accessibility JS | ✅ Done |
+| Residents | ✅ Full CRUD (search, filter, pagination, soft delete) |
+| Clearances | ✅ Workflow (process → sign → release) |
+| Certificates | ✅ Create + sign/release, resident lookup |
+| Appointments | ✅ List/show/complete/cancel + slot management |
+| Bulletins | ✅ Create/list/delete with category + pin |
+| Households, Documents, Finance, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
+
+---
+
+## Fixed Issues & Resolutions
+
+A log of notable bugs found and resolved during development:
+
+### 1. Soft-delete silently not persisting (`core/Model.php`)
+**Bug:** `Model::delete()` called `update()`, which passed the data through `filterData()`. Because `deleted_at` was not in a model's `fillable` whitelist, the column was stripped out — so soft deletes never actually saved and "deleted" records kept appearing.
+**Fix:** Rewrote `delete()` to run a direct `UPDATE ... SET deleted_at = NOW(), updated_at = NOW()` against the primary key. This fixes soft deletes for every model in the app.
+
+### 2. "Class not found" fatal errors on 30 admin/public controllers
+**Bug:** Every scaffolded stub controller was corrupted on disk — the `<?php` opening tag had been removed **and** all `$` tokens were stripped (e.g. `__call(\, \)` instead of `__call($name, $args)`, `\->view...` instead of `$this->view...`). PHP served these files as plain text and never defined the classes, so routes like `/admin/households` and `/admin/reports` threw `Class "...Controller" not found`.
+**Fix:** A repair pass (1) restored the stripped `$` tokens, and (2) re-added the missing `<?php` open tag to every controller. All controllers now lint clean and every module page renders.
+
+### 3. Admin pages showing bare HTML (static assets 404)
+**Bug:** `public/.htaccess` intercepted all requests for static assets (CSS/JS), returning 404 and causing layouts to render unstyled/broken.
+**Fix:** Removed the offending `.htaccess`; static assets now serve correctly.
+
+### 4. Bootstrap 5 UI redesign (framework adoption)
+The original custom CSS pipeline wasn't loading reliably. The frontend was rebuilt on **Bootstrap 5 + Bootstrap Icons** (CDN) for both the public portal and the admin backend, with the custom CSS reduced to theme overrides. **Dark mode** and **high-contrast** modes (in `accessibility.css`) now override Bootstrap's CSS variables so they work with the new components.
 
 ---
 
