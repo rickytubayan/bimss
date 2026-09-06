@@ -51,6 +51,7 @@ Built with **vanilla PHP 8 + MySQL/MariaDB** (no frameworks) for easy deployment
 4. *(Optional)* Load sample reference data so dropdowns/forms have selectable options (safe to re-run):
    ```
    mysql -u root bims < seeds/seed_reference.sql
+   mysql -u root bims < seeds/seed_health.sql
    ```
 5. Configure DB credentials in `config/database.php` (defaults: host `localhost`, user `root`, no password, db `bims`).
 6. Open **http://localhost/BIMSS/**
@@ -119,6 +120,7 @@ BIMSS/
 ├── migrations/            # 001_full_schema.sql (86 tables)
 ├── seeds/                 # seed.sql (roles, permissions, default users)
 │                          # seed_reference.sql (sample reference data)
+│                          # seed_health.sql (sample health records)
 ├── lang/                  # en, fil, bis, ilc, bic translation files
 └── DEFAULT_ACCOUNTS.txt
 ```
@@ -168,7 +170,9 @@ Currently implemented/skeleton:
 | Bulletins | ✅ Create/list/delete with category + pin |
 | Finance | ✅ Income, expenses, and official receipts (record, list, auto receipt #) |
 | Budget | ✅ Create budget + line items, overview list, detail with utilization/balance |
-| Documents, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Tax | ✅ Tax ledger with assessments, status tracking (unpaid/partial/paid/delinquent), payment recording |
+| Health | ✅ Maternal care, immunization, child growth, disease surveillance, program overview |
+| Documents, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -206,6 +210,18 @@ The `/admin/finance` page only rendered an "Under Construction" stub even though
 
 ### 9. Budget module implemented & "cannot save budget" fix
 The `/admin/budget` page was also an "Under Construction" stub. Implemented the full Budget module (list of budgets with allocated/utilized/balance, a create form with a budget header plus dynamic line items against chart-of-accounts, and a detail page with per-line utilization). The create form could not save because the chart of accounts was empty (it had been removed with the earlier test-data cleanup), so the line-item account dropdown had no options and validation always rejected the form — reseeded the standard 13 chart-of-accounts entries to fix it.
+
+### 10. Tax module — ledger, status tracking & payments
+The `/admin/tax` page was a stub. Implemented the module: overview stats, a tax ledger listing assessments with resident names, filters, and inline payment recording per ledger row. Payment amounts are capped at the remaining balance and the ledger status is recomputed (`unpaid` → `partial` → `paid`) on every insert; overdue unpaid entries are automatically flagged `delinquent`.
+
+### 11. Health module — BHERT records implemented
+The `/admin/health` page was a stub. Implemented the module: an overview dashboard with health stats (pregnant women, maternal/immunization/growth/surveillance counts, programs), a disease-surveillance feed, and CRUD-style record pages for maternal care, immunization, child growth, and disease surveillance (validation + inserts against their tables). Health pages were redesigned to match the other admin modules (stats cards + tables on the overview; side-by-side form + table on the record pages).
+
+### 12. Health module showing empty dashboard — sample data seed
+After implementation, `/admin/health` (and its record dropdowns) had nothing to show because all residents were soft-deleted during earlier test-data cleanup. Added `seeds/seed_health.sql` (idempotent, safe to re-run) that restores the soft-deleted residents, adds a sample family, and seeds maternal, immunization, child-growth, and disease-surveillance records plus health programs — so every page and form dropdown is populated during development.
+
+### 13. Admin page rendered as a bare fragment (missing layout)
+`Controller::view()` runs `extract($data)` before resolving the layout. Any controller passing a top-level view-variable named `data` (e.g. `'data' => $stats`) silently overwrote the method's own `$data` variable, making `$data['layout']` null — the page then echoed only the view content with no admin layout/sidebar. Renamed the offending key in `HealthController::index()` to `stats` so the layout resolves; this also prevents the same footgun for any future/other pages using a `data` key.
 
 ---
 

@@ -106,14 +106,19 @@ class App {
             $r->get('budget/{id}', 'Admin\BudgetController@show');
 
             $r->get('tax', 'Admin\TaxController@index');
+            $r->get('tax/create', 'Admin\TaxController@create');
             $r->post('tax/store', 'Admin\TaxController@store');
             $r->post('tax/payment/{id}', 'Admin\TaxController@recordPayment');
 
             $r->get('health', 'Admin\HealthController@index');
             $r->get('health/maternal', 'Admin\HealthController@maternal');
+            $r->post('health/maternal/store', 'Admin\HealthController@storeMaternal');
             $r->get('health/immunization', 'Admin\HealthController@immunization');
+            $r->post('health/immunization/store', 'Admin\HealthController@storeImmunization');
             $r->get('health/growth', 'Admin\HealthController@growth');
+            $r->post('health/growth/store', 'Admin\HealthController@storeGrowth');
             $r->get('health/surveillance', 'Admin\HealthController@surveillance');
+            $r->post('health/surveillance/store', 'Admin\HealthController@storeSurveillance');
 
             $r->get('seniors', 'Admin\SeniorPWDController@index');
             $r->post('seniors/store', 'Admin\SeniorPWDController@store');
