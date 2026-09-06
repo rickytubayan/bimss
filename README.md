@@ -181,7 +181,8 @@ Currently implemented/skeleton:
 | Assets | ✅ Asset registry (vehicle, equipment, facility, furniture), condition/status tracking, purchase value, maintenance log with cost and next-schedule, total investment |
 | Venue Bookings | ✅ Venue booking registration (resident, schedule, purpose, amount, payment), confirm/cancel workflow with status filtering |
 | Livelihood | ✅ Job postings (company, position, salary, expiry, active/inactive), farmer registry with farm size and crops (duplicate registration guarded) |
-| Documents, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Compliance | ✅ Transparency documents (annual budget, income/expenditure, NTA, procurement, awards, collections, reports) with file upload & public posting |
+| Documents, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -262,6 +263,9 @@ The `/admin/bookings` pages only rendered the generic "Under Construction" place
 
 ### 23. Livelihood module — "Under Construction" stub replaced
 The `/admin/livelihood` pages only rendered the generic "Under Construction" placeholder. Implemented the module: an overview with statistics (job postings, active jobs, applications, farmers), a filterable **job postings** page (active/expired) with an inline post-a-job form (company, position, salary range, expiry, description, requirements) and a **farmer registry** page with statistics (total/active farmers, farm hectares), a status-filterable registry listing farm size/crops/livestock, and a registration form. Farmer registration rejects a resident already in the registry (dropdown options for registered farmers are disabled too), and requires a `\PDO::FETCH_COLUMN` global-namespace prefix — without it PHP 8 resolves `PDO` to `Controllers\Admin\PDO` and throws `Class not found`. Routes follow the `{id}`→`$id` parameter-mapping convention; a new `POST livelihood/farmers/store` route was added for the registration form.
+
+### 24. Compliance & Transparency module — "Under Construction" stub replaced
+The `/admin/compliance` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `transparency_documents` table (full-disclosure documents: annual budget, income/expenditure, NTA utilization, procurement, awards, monthly collections, annual report): an overview with statistics (documents, posted, fiscal years covered, expired needing re-post), a type-filterable document ledger (title, type badge, fiscal year/quarter, posted date, valid-until, status), and an **upload form** that validates title/type/year/status and the file extension (PDF/Word/Excel/images), moves the upload into `public/uploads/transparency/` (auto-generated filename), and records the `uploads/transparency/...` path in the DB. Two bugs surfaced: the download link must use the `asset()` helper (which prefixes `/public/`) — `url()` resolves to `/BIMSS/...` and ran through the router to a 404 — and PHP 8 namespace resolution again (fixed with `\PDO::FETCH_COLUMN`). Uploads are served directly by Apache's rewrite `!-f` rule, so posted documents open under `/BIMSS/public/uploads/transparency/...`.
 
 ---
 
