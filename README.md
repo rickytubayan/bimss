@@ -179,6 +179,7 @@ Currently implemented/skeleton:
 | DRRM | ✅ Disaster event log, RDANA assessments (shelter + effect breakdowns), hazard zone map, relief inventory & distributions |
 | Evacuation | ✅ Evacuation centers with status + capacity/utilization, resident check-in/check-out (transactional occupancy) |
 | Assets | ✅ Asset registry (vehicle, equipment, facility, furniture), condition/status tracking, purchase value, maintenance log with cost and next-schedule, total investment |
+| Venue Bookings | ✅ Venue booking registration (resident, schedule, purpose, amount, payment), confirm/cancel workflow with status filtering |
 | Documents, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
@@ -254,6 +255,9 @@ The `/admin/evacuation` pages only rendered the generic "Under Construction" pla
 
 ### 21. Assets module — "Under Construction" stub replaced
 The `/admin/assets` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `assets` and `maintenance_logs` tables: an overview with asset statistics (total/in-use/under-repair/available + total purchase value), a status-filterable asset list with inline registration form (name, category, purchase date/cost, condition, status, next maintenance, description), and a detail page with asset info, maintenance form (date, description, cost, performed by, next maintenance), and maintenance history table. Recording maintenance is transactional — the maintenance log is inserted and the asset's `current_condition` is set to `fair`, `status` to `under_repair`, and `next_maintenance` updated in one commit. The `create()` method and `/assets/create` route were removed since the registration form is inline on the index page.
+
+### 22. Venue Bookings module — "Under Construction" stub replaced
+The `/admin/bookings` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `venue_bookings` table: an overview with booking statistics (total/pending/confirmed + collected fees), a status-filterable booking list (venue, booker resident, schedule, purpose, payment, status), and transactional **confirm / cancel** actions (pending→confirmed; pending/confirmed→cancelled with payment set to `refunded`; invalid transitions rejected). The confirm/cancel routes accept a `{id}` param that maps to the controller method's `$id`. A "New Booking" form was later added (the initial version only listed bookings) — stored via a new `POST bookings/store` handler with inline validation against the residents table, creating bookings as `pending`.
 
 ---
 

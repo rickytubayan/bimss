@@ -163,6 +163,7 @@ class App {
             $r->post('assets/{id}/maintenance', 'Admin\AssetController@addMaintenance');
 
             $r->get('bookings', 'Admin\BookingController@index');
+            $r->post('bookings/store', 'Admin\BookingController@store');
             $r->post('bookings/confirm/{id}', 'Admin\BookingController@confirm');
             $r->post('bookings/cancel/{id}', 'Admin\BookingController@cancel');
 
