@@ -152,6 +152,7 @@ class App {
             $r->get('drrm/relief', 'Admin\DRRMController@relief');
 
             $r->get('evacuation', 'Admin\EvacuationController@index');
+            $r->post('evacuation/store', 'Admin\EvacuationController@store');
             $r->get('evacuation/{id}', 'Admin\EvacuationController@show');
             $r->post('evacuation/{id}/checkin', 'Admin\EvacuationController@checkIn');
             $r->post('evacuation/{id}/checkout', 'Admin\EvacuationController@checkOut');
