@@ -182,7 +182,7 @@ Currently implemented/skeleton:
 | Venue Bookings | ✅ Venue booking registration (resident, schedule, purpose, amount, payment), confirm/cancel workflow with status filtering |
 | Livelihood | ✅ Job postings (company, position, salary, expiry, active/inactive), farmer registry with farm size and crops (duplicate registration guarded) |
 | Compliance | ✅ Transparency documents (annual budget, income/expenditure, NTA, procurement, awards, collections, reports) with file upload & public posting |
-| Documents, Reports | 🚧 Controllers scaffolded, views pending |
+| Reports | ✅ Annual report (monthly income vs expenses, fund-type breakdowns, service delivery), SOBA (statutory allocations & budgets), budget utilization per fund type |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -266,6 +266,9 @@ The `/admin/livelihood` pages only rendered the generic "Under Construction" pla
 
 ### 24. Compliance & Transparency module — "Under Construction" stub replaced
 The `/admin/compliance` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `transparency_documents` table (full-disclosure documents: annual budget, income/expenditure, NTA utilization, procurement, awards, monthly collections, annual report): an overview with statistics (documents, posted, fiscal years covered, expired needing re-post), a type-filterable document ledger (title, type badge, fiscal year/quarter, posted date, valid-until, status), and an **upload form** that validates title/type/year/status and the file extension (PDF/Word/Excel/images), moves the upload into `public/uploads/transparency/` (auto-generated filename), and records the `uploads/transparency/...` path in the DB. Two bugs surfaced: the download link must use the `asset()` helper (which prefixes `/public/`) — `url()` resolves to `/BIMSS/...` and ran through the router to a 404 — and PHP 8 namespace resolution again (fixed with `\PDO::FETCH_COLUMN`). Uploads are served directly by Apache's rewrite `!-f` rule, so posted documents open under `/BIMSS/public/uploads/transparency/...`.
+
+### 25. Reports module — "Under Construction" stub replaced
+The `/admin/reports` pages only rendered the generic "Under Construction" placeholder. Implemented the module with four report views sharing a fiscal-year selector and sub-navigation: an **overview** (income, expenses, net surplus/deficit, approved budget stats plus an expenses-by-fund-type bar chart and links to the three reports), the **annual report** (monthly income-vs-expense table, income/expenses by fund type, and a service delivery summary — new residents, clearances, certificates, blotters, complaints, senior & PWD, donations, taxes collected — with a link to a posted annual report document if one exists), the **SOBA** report (Statement of Budget and Allocations: statutory fund allocations with mandated %, allocated, spent, balance and utilization bars, plus approved budgets by fund type), and the **budget** report (total allocated/utilized/balance/utilization-rate stats plus per-fund budget utilization with line-item allocations, actual spending, and balances). A `selectedYear()` helper validates the `?year=` query parameter against the available fiscal years collected across budgets, income/expense records, statutory allocations, and transparency documents.
 
 ---
 
