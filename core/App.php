@@ -171,6 +171,7 @@ class App {
             $r->get('livelihood/jobs', 'Admin\LivelihoodController@jobs');
             $r->post('livelihood/jobs/store', 'Admin\LivelihoodController@storeJob');
             $r->get('livelihood/farmers', 'Admin\LivelihoodController@farmers');
+            $r->post('livelihood/farmers/store', 'Admin\LivelihoodController@storeFarmer');
 
             $r->get('compliance', 'Admin\ComplianceController@index');
             $r->get('compliance/transparency', 'Admin\ComplianceController@transparency');

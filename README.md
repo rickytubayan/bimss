@@ -180,6 +180,7 @@ Currently implemented/skeleton:
 | Evacuation | ✅ Evacuation centers with status + capacity/utilization, resident check-in/check-out (transactional occupancy) |
 | Assets | ✅ Asset registry (vehicle, equipment, facility, furniture), condition/status tracking, purchase value, maintenance log with cost and next-schedule, total investment |
 | Venue Bookings | ✅ Venue booking registration (resident, schedule, purpose, amount, payment), confirm/cancel workflow with status filtering |
+| Livelihood | ✅ Job postings (company, position, salary, expiry, active/inactive), farmer registry with farm size and crops (duplicate registration guarded) |
 | Documents, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
@@ -258,6 +259,9 @@ The `/admin/assets` pages only rendered the generic "Under Construction" placeho
 
 ### 22. Venue Bookings module — "Under Construction" stub replaced
 The `/admin/bookings` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `venue_bookings` table: an overview with booking statistics (total/pending/confirmed + collected fees), a status-filterable booking list (venue, booker resident, schedule, purpose, payment, status), and transactional **confirm / cancel** actions (pending→confirmed; pending/confirmed→cancelled with payment set to `refunded`; invalid transitions rejected). The confirm/cancel routes accept a `{id}` param that maps to the controller method's `$id`. A "New Booking" form was later added (the initial version only listed bookings) — stored via a new `POST bookings/store` handler with inline validation against the residents table, creating bookings as `pending`.
+
+### 23. Livelihood module — "Under Construction" stub replaced
+The `/admin/livelihood` pages only rendered the generic "Under Construction" placeholder. Implemented the module: an overview with statistics (job postings, active jobs, applications, farmers), a filterable **job postings** page (active/expired) with an inline post-a-job form (company, position, salary range, expiry, description, requirements) and a **farmer registry** page with statistics (total/active farmers, farm hectares), a status-filterable registry listing farm size/crops/livestock, and a registration form. Farmer registration rejects a resident already in the registry (dropdown options for registered farmers are disabled too), and requires a `\PDO::FETCH_COLUMN` global-namespace prefix — without it PHP 8 resolves `PDO` to `Controllers\Admin\PDO` and throws `Class not found`. Routes follow the `{id}`→`$id` parameter-mapping convention; a new `POST livelihood/farmers/store` route was added for the registration form.
 
 ---
 
