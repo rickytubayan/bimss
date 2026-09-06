@@ -174,7 +174,8 @@ Currently implemented/skeleton:
 | Health | ✅ Maternal care, immunization, child growth, disease surveillance, program overview |
 | Senior & PWD | ✅ Registry with senior/PWD profiles, pension tracking, benefits, filter views |
 | Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update |
-| Documents, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Lupon | ✅ KP case workflow: mediation/pangkat/conciliation, hearings, settlements, CFA issuance |
+| Documents, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -230,6 +231,9 @@ The `/admin/seniors` page only rendered the generic "Under Construction" placeho
 
 ### 15. Blotter module — "Under Construction" stub replaced
 The `/admin/blotter` page only rendered the generic "Under Construction" placeholder. Implemented the full module on the `blotters` + `blotter_witnesses` tables: an overview with case statistics (total/open/resolved/closed), a walk-in registration form (reporter, incident type, narrative, location, purok, incident date-time) that auto-assigns a `BLT-*` case number, a status-filterable entry table, and a detail page with the incident narrative, witnesses list, and a case-update panel (status, assigned tanod, case number).
+
+### 16. Lupon (Katarungang Pambarangay) module — "Under Construction" stub replaced
+The `/admin/lupon` pages only rendered the generic "Under Construction" placeholder. Implemented the full KP module on the `kp_cases`, `kp_hearings`, `kp_settlements`, and `kp_cfa` tables: an overview with Lupon members and case statistics, a cases list with status filters, a case-filing form (complainant/respondent residents, nature of dispute, cause of action) that auto-assigns a `KP-*` case number, and a case detail page with hearing scheduling/recording, settlement recording (marks the case settled), and Certificate of Arbitration issuance (auto `CFA-*` number, flips the case to `cfa_issued`) — each apply-write handled in a transaction.
 
 ---
 
