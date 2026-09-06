@@ -4,8 +4,8 @@ namespace Models;
 class Household extends \Model {
     protected $table = 'households';
     protected $fillable = [
-        'barangay_id', 'purok_id', 'house_number', 'street', 'gps_latitude',
-        'gps_longitude', 'classification', 'status'
+        'barangay_id', 'purok_id', 'house_number', 'street',
+        'classification', 'status'
     ];
 
     public function getMembers($householdId) {

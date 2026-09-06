@@ -48,8 +48,12 @@ Built with **vanilla PHP 8 + MySQL/MariaDB** (no frameworks) for easy deployment
    mysql -u root < migrations/001_full_schema.sql
    mysql -u root bims < seeds/seed.sql
    ```
-4. Configure DB credentials in `config/database.php` (defaults: host `localhost`, user `root`, no password, db `bims`).
-5. Open **http://localhost/BIMSS/**
+4. *(Optional)* Load sample reference data so dropdowns/forms have selectable options (safe to re-run):
+   ```
+   mysql -u root bims < seeds/seed_reference.sql
+   ```
+5. Configure DB credentials in `config/database.php` (defaults: host `localhost`, user `root`, no password, db `bims`).
+6. Open **http://localhost/BIMSS/**
 
 ---
 
@@ -114,6 +118,7 @@ BIMSS/
 │   └── uploads/           # complaints, dana, profiles
 ├── migrations/            # 001_full_schema.sql (86 tables)
 ├── seeds/                 # seed.sql (roles, permissions, default users)
+│                          # seed_reference.sql (sample reference data)
 ├── lang/                  # en, fil, bis, ilc, bic translation files
 └── DEFAULT_ACCOUNTS.txt
 ```
@@ -156,11 +161,12 @@ Currently implemented/skeleton:
 | Core framework, Auth, RBAC | ✅ Done |
 | Layouts, CSS (Bootstrap 5), accessibility JS | ✅ Done |
 | Residents | ✅ Full CRUD (search, filter, pagination, soft delete) |
+| Households | ✅ Full CRUD (list, add, edit, show, soft delete, search/filter) |
 | Clearances | ✅ Workflow (process → sign → release) |
 | Certificates | ✅ Create + sign/release, resident lookup |
 | Appointments | ✅ List/show/complete/cancel + slot management |
 | Bulletins | ✅ Create/list/delete with category + pin |
-| Households, Documents, Finance, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Documents, Finance, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -183,6 +189,15 @@ A log of notable bugs found and resolved during development:
 
 ### 4. Bootstrap 5 UI redesign (framework adoption)
 The original custom CSS pipeline wasn't loading reliably. The frontend was rebuilt on **Bootstrap 5 + Bootstrap Icons** (CDN) for both the public portal and the admin backend, with the custom CSS reduced to theme overrides. **Dark mode** and **high-contrast** modes (in `accessibility.css`) now override Bootstrap's CSS variables so they work with the new components.
+
+### 5. GPS coordinates removed from household forms
+The **GPS Latitude / Longitude** inputs on the household create form were not needed. They were removed across the form (`_form.php`), the field extraction (`HouseholdController`), the model `fillable`, and the detail view (`show.php`).
+
+### 6. Household store failing — `barangay_id` could not be null
+`households.barangay_id` is `NOT NULL`, but the create form has no barangay field and the config `barangay.name` was empty, so `barangay_id` was saved as `NULL` and every insert failed with `Column 'barangay_id' cannot be null`. `extractData()` now resolves `barangay_id` from the selected **purok** first (falling back to the config-based lookup), so households linked to a Purok/Sitio save correctly.
+
+### 7. Sample reference data for testing (`seeds/seed_reference.sql`)
+Added an idempotent, re-runnable seed that populates a sample geography tree (region → province → city → barangay → puroks), households, residents (+ resident links), a chart of accounts, appointment slots, health programs, notification templates, and lupon members — so every admin form's dropdowns have selectable options during development.
 
 ---
 
