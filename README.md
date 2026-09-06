@@ -175,6 +175,7 @@ Currently implemented/skeleton:
 | Senior & PWD | ✅ Registry with senior/PWD profiles, pension tracking, benefits, filter views |
 | Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update |
 | Lupon | ✅ KP case workflow: mediation/pangkat/conciliation, hearings, settlements, CFA issuance |
+| Tanod & CCTV | ✅ Tanod roster, duty schedules (JSON member assignments), CCTV camera registry |
 | Documents, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
@@ -234,6 +235,13 @@ The `/admin/blotter` page only rendered the generic "Under Construction" placeho
 
 ### 16. Lupon (Katarungang Pambarangay) module — "Under Construction" stub replaced
 The `/admin/lupon` pages only rendered the generic "Under Construction" placeholder. Implemented the full KP module on the `kp_cases`, `kp_hearings`, `kp_settlements`, and `kp_cfa` tables: an overview with Lupon members and case statistics, a cases list with status filters, a case-filing form (complainant/respondent residents, nature of dispute, cause of action) that auto-assigns a `KP-*` case number, and a case detail page with hearing scheduling/recording, settlement recording (marks the case settled), and Certificate of Arbitration issuance (auto `CFA-*` number, flips the case to `cfa_issued`) — each apply-write handled in a transaction.
+
+### 17. Tanod & CCTV module — "Under Construction" stub replaced
+The `/admin/tanod` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `tanod_schedules` and `cctv_cameras` tables plus the tanod role of `users`: an overview with the tanod roster and duty statistics, a duty-scheduling form with multi-member assignment, a filterable schedule list, and a CCTV camera registry with online/offline stats. Two sample tanod users were added as reference data so the roster and assignment dropdown are populated.
+
+### 18. `tanod_schedules.assigned_members` is a JSON column
+**Bug:** Saving a schedule stored the selected members as a comma-separated string, but `assigned_members` is declared `JSON` in `001_full_schema.sql` (stored as `LONGTEXT` with a `json_valid` CHECK constraint in MariaDB). The insert failed with `SQLSTATE[23000] ... CONSTRAINT tanod_schedules.assigned_members failed`. Storing plain text tripped the JSON validity check.
+**Fix:** Encode the member array with `json_encode()` on insert and `json_decode()` back to a list for display in both the overview and the schedule views.
 
 ---
 
