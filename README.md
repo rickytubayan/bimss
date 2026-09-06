@@ -167,6 +167,7 @@ Currently implemented/skeleton:
 | Appointments | ✅ List/show/complete/cancel + slot management |
 | Bulletins | ✅ Create/list/delete with category + pin |
 | Finance | ✅ Income, expenses, and official receipts (record, list, auto receipt #) |
+| Budget | ✅ Create budget + line items, overview list, detail with utilization/balance |
 | Documents, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
@@ -202,6 +203,9 @@ Added an idempotent, re-runnable seed that populates a sample geography tree (re
 
 ### 8. Finance module — "Under Construction" stub replaced
 The `/admin/finance` page only rendered an "Under Construction" stub even though routes existed for income, expenses, and receipts. Implemented the full Finance module: an overview dashboard (income, expenses, net position, receipt count), record forms + lists for income and expenses, and official-receipt generation with auto-incrementing receipt numbers (validation + database inserts for `income_records`, `expense_records`, and `official_receipts`).
+
+### 9. Budget module implemented & "cannot save budget" fix
+The `/admin/budget` page was also an "Under Construction" stub. Implemented the full Budget module (list of budgets with allocated/utilized/balance, a create form with a budget header plus dynamic line items against chart-of-accounts, and a detail page with per-line utilization). The create form could not save because the chart of accounts was empty (it had been removed with the earlier test-data cleanup), so the line-item account dropdown had no options and validation always rejected the form — reseeded the standard 13 chart-of-accounts entries to fix it.
 
 ---
 
