@@ -172,6 +172,7 @@ Currently implemented/skeleton:
 | Budget | ✅ Create budget + line items, overview list, detail with utilization/balance |
 | Tax | ✅ Tax ledger with assessments, status tracking (unpaid/partial/paid/delinquent), payment recording |
 | Health | ✅ Maternal care, immunization, child growth, disease surveillance, program overview |
+| Senior & PWD | ✅ Registry with senior/PWD profiles, pension tracking, benefits, filter views |
 | Documents, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
@@ -222,6 +223,9 @@ After implementation, `/admin/health` (and its record dropdowns) had nothing to 
 
 ### 13. Admin page rendered as a bare fragment (missing layout)
 `Controller::view()` runs `extract($data)` before resolving the layout. Any controller passing a top-level view-variable named `data` (e.g. `'data' => $stats`) silently overwrote the method's own `$data` variable, making `$data['layout']` null — the page then echoed only the view content with no admin layout/sidebar. Renamed the offending key in `HealthController::index()` to `stats` so the layout resolves; this also prevents the same footgun for any future/other pages using a `data` key.
+
+### 14. Senior & PWD module — "Under Construction" stub replaced
+The `/admin/seniors` page only rendered the generic "Under Construction" placeholder. Implemented the full module based on the `senior_pwd_profiles` table: an overview with statistics (senior citizens, PWDs, active pensioners, monthly allowance), a registration form (resident, type, pension status, allowance/grocery benefits, OSCA/PWD numbers), and a filterable registry table with badge-styled type/pension statuses. Storing a profile that already exists for the same resident+type is rejected with a clear flash message (unique-key violation handled instead of a generic 500).
 
 ---
 
