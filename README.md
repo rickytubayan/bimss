@@ -166,7 +166,8 @@ Currently implemented/skeleton:
 | Certificates | ✅ Create + sign/release, resident lookup |
 | Appointments | ✅ List/show/complete/cancel + slot management |
 | Bulletins | ✅ Create/list/delete with category + pin |
-| Documents, Finance, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Finance | ✅ Income, expenses, and official receipts (record, list, auto receipt #) |
+| Documents, Health, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -198,6 +199,9 @@ The **GPS Latitude / Longitude** inputs on the household create form were not ne
 
 ### 7. Sample reference data for testing (`seeds/seed_reference.sql`)
 Added an idempotent, re-runnable seed that populates a sample geography tree (region → province → city → barangay → puroks), households, residents (+ resident links), a chart of accounts, appointment slots, health programs, notification templates, and lupon members — so every admin form's dropdowns have selectable options during development.
+
+### 8. Finance module — "Under Construction" stub replaced
+The `/admin/finance` page only rendered an "Under Construction" stub even though routes existed for income, expenses, and receipts. Implemented the full Finance module: an overview dashboard (income, expenses, net position, receipt count), record forms + lists for income and expenses, and official-receipt generation with auto-incrementing receipt numbers (validation + database inserts for `income_records`, `expense_records`, and `official_receipts`).
 
 ---
 
