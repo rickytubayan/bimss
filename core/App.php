@@ -124,6 +124,7 @@ class App {
             $r->post('seniors/store', 'Admin\SeniorPWDController@store');
 
             $r->get('blotter', 'Admin\BlotterController@index');
+            $r->post('blotter/store', 'Admin\BlotterController@store');
             $r->get('blotter/{id}', 'Admin\BlotterController@show');
             $r->post('blotter/{id}/update', 'Admin\BlotterController@update');
 

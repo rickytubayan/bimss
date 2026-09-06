@@ -173,7 +173,8 @@ Currently implemented/skeleton:
 | Tax | ✅ Tax ledger with assessments, status tracking (unpaid/partial/paid/delinquent), payment recording |
 | Health | ✅ Maternal care, immunization, child growth, disease surveillance, program overview |
 | Senior & PWD | ✅ Registry with senior/PWD profiles, pension tracking, benefits, filter views |
-| Documents, Blotter, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update |
+| Documents, Lupon, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -226,6 +227,9 @@ After implementation, `/admin/health` (and its record dropdowns) had nothing to 
 
 ### 14. Senior & PWD module — "Under Construction" stub replaced
 The `/admin/seniors` page only rendered the generic "Under Construction" placeholder. Implemented the full module based on the `senior_pwd_profiles` table: an overview with statistics (senior citizens, PWDs, active pensioners, monthly allowance), a registration form (resident, type, pension status, allowance/grocery benefits, OSCA/PWD numbers), and a filterable registry table with badge-styled type/pension statuses. Storing a profile that already exists for the same resident+type is rejected with a clear flash message (unique-key violation handled instead of a generic 500).
+
+### 15. Blotter module — "Under Construction" stub replaced
+The `/admin/blotter` page only rendered the generic "Under Construction" placeholder. Implemented the full module on the `blotters` + `blotter_witnesses` tables: an overview with case statistics (total/open/resolved/closed), a walk-in registration form (reporter, incident type, narrative, location, purok, incident date-time) that auto-assigns a `BLT-*` case number, a status-filterable entry table, and a detail page with the incident narrative, witnesses list, and a case-update panel (status, assigned tanod, case number).
 
 ---
 
