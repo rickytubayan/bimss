@@ -178,7 +178,8 @@ Currently implemented/skeleton:
 | Tanod & CCTV | ✅ Tanod roster, duty schedules (JSON member assignments), CCTV camera registry |
 | DRRM | ✅ Disaster event log, RDANA assessments (shelter + effect breakdowns), hazard zone map, relief inventory & distributions |
 | Evacuation | ✅ Evacuation centers with status + capacity/utilization, resident check-in/check-out (transactional occupancy) |
-| Documents, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| Assets | ✅ Asset registry (vehicle, equipment, facility, furniture), condition/status tracking, purchase value, maintenance log with cost and next-schedule, total investment |
+| Documents, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -250,6 +251,9 @@ The `/admin/drrm` pages only rendered the generic "Under Construction" placehold
 
 ### 20. Evacuation module — "Under Construction" stub replaced
 The `/admin/evacuation` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `evacuation_centers` and `evacuation_occupants` tables: an overview with center statistics (total/open/full/currently-evacuated), a status-filterable center list showing occupancy vs. max capacity with a utilization progress bar, a center registration form (name, address, capacity, status, facilities encoded as JSON), and a detail page with occupancy/utilization stats and transactional resident **check-in / check-out** that keeps `current_occupancy` in sync, guards against duplicate active check-ins, and records `date_out` + status. The residents dropdown query needed `FROM residents r` (the shared `NAME_SQL` references `r.last_name`, which failed with `Unknown column` without the alias). GPS latitude/longitude were later removed from the form, detail view, and store insert per requirements.
+
+### 21. Assets module — "Under Construction" stub replaced
+The `/admin/assets` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `assets` and `maintenance_logs` tables: an overview with asset statistics (total/in-use/under-repair/available + total purchase value), a status-filterable asset list with inline registration form (name, category, purchase date/cost, condition, status, next maintenance, description), and a detail page with asset info, maintenance form (date, description, cost, performed by, next maintenance), and maintenance history table. Recording maintenance is transactional — the maintenance log is inserted and the asset's `current_condition` is set to `fair`, `status` to `under_repair`, and `next_maintenance` updated in one commit. The `create()` method and `/assets/create` route were removed since the registration form is inline on the index page.
 
 ---
 

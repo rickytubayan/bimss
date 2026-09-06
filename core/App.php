@@ -158,7 +158,6 @@ class App {
             $r->post('evacuation/{id}/checkout', 'Admin\EvacuationController@checkOut');
 
             $r->get('assets', 'Admin\AssetController@index');
-            $r->get('assets/create', 'Admin\AssetController@create');
             $r->post('assets/store', 'Admin\AssetController@store');
             $r->get('assets/{id}', 'Admin\AssetController@show');
             $r->post('assets/{id}/maintenance', 'Admin\AssetController@addMaintenance');
