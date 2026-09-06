@@ -176,7 +176,8 @@ Currently implemented/skeleton:
 | Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update |
 | Lupon | ✅ KP case workflow: mediation/pangkat/conciliation, hearings, settlements, CFA issuance |
 | Tanod & CCTV | ✅ Tanod roster, duty schedules (JSON member assignments), CCTV camera registry |
-| Documents, DRRM, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
+| DRRM | ✅ Disaster event log, RDANA assessments (shelter + effect breakdowns), hazard zone map, relief inventory & distributions |
+| Documents, Assets, Compliance, Reports | 🚧 Controllers scaffolded, views pending |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -242,6 +243,9 @@ The `/admin/tanod` pages only rendered the generic "Under Construction" placehol
 ### 18. `tanod_schedules.assigned_members` is a JSON column
 **Bug:** Saving a schedule stored the selected members as a comma-separated string, but `assigned_members` is declared `JSON` in `001_full_schema.sql` (stored as `LONGTEXT` with a `json_valid` CHECK constraint in MariaDB). The insert failed with `SQLSTATE[23000] ... CONSTRAINT tanod_schedules.assigned_members failed`. Storing plain text tripped the JSON validity check.
 **Fix:** Encode the member array with `json_encode()` on insert and `json_decode()` back to a list for display in both the overview and the schedule views.
+
+### 19. DRRM module — "Under Construction" stub replaced
+The `/admin/drrm` pages only rendered the generic "Under Construction" placeholder. Implemented the module on the `disaster_events` and `rdana_*` tables: an overview with disaster statistics, a filterable disaster-event log with a record form (auto type/severity badges), a show page with full incident details, RDANA pages (an event's assessment reports + a multi-part assessment form that saves the report, shelter impact, and per-category effect breakdowns — affected/displaced/dead/injured/missing — in one transaction, plus a reports list linking back to events) to `hazardMap.php` (hazard zone list with risk-level badges) and `relief.php` (inventory + recent distributions). Two bugs surfaced during verification: the `rdana/{event_id}` route's named parameter must match the controller method signature (`rdana($event_id)`) or PHP 8 throws `Unknown named parameter` from `Router.php`, and `rdana_shelter.immediate_needs` is a JSON column, so the needs text is `json_encode()`d (split by line) before insert.
 
 ---
 
