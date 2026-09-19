@@ -16,7 +16,6 @@ Public home page : http://localhost/BIMSS/
 Admin panel      : http://localhost/BIMSS/admin/dashboard
 Public login     : http://localhost/BIMSS/auth/login
 Register         : http://localhost/BIMSS/auth/register
-OTP login        : http://localhost/BIMSS/auth/otp
 
 NOTES
 ================================

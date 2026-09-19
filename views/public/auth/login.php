@@ -29,10 +29,6 @@
                     <button type="submit" class="btn btn-primary w-100 py-2"><i class="bi bi-box-arrow-in-right me-1"></i><?= t('login') ?></button>
                 </form>
 
-                <div class="text-center mt-3">
-                    <a href="<?= url('auth/otp') ?>"><i class="bi bi-shield-lock me-1"></i>Login with OTP</a>
-                </div>
-
                 <hr class="my-4">
 
                 <div class="text-center">

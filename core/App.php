@@ -27,8 +27,6 @@ class App {
             $r->group('auth', [], function ($r) {
                 $r->get('login', 'Public\AuthController@showLogin');
                 $r->post('login', 'Public\AuthController@login');
-                $r->get('otp', 'Public\AuthController@showOTP');
-                $r->post('otp', 'Public\AuthController@verifyOTP');
                 $r->get('register', 'Public\AuthController@showRegister');
                 $r->post('register', 'Public\AuthController@register');
                 $r->get('logout', 'Public\AuthController@logout');

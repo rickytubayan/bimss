@@ -14,8 +14,6 @@ return [
     'max_upload_size' => 5242880,
     'session_lifetime' => 7200,
     'pagination_per_page' => 20,
-    'otp_expiry_minutes' => 10,
-    'otp_length' => 6,
     'barangay' => [
         'name' => 'Napnapan Norte',
         'code' => '640233',

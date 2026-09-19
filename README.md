@@ -33,7 +33,7 @@ Built with **vanilla PHP 8 + MySQL/MariaDB** (no frameworks) for easy deployment
 | Charts | Chart.js |
 | QR Codes | phpqrcode (generate) + html5-qrcode (scan) |
 | TTS / Voice | Web Speech API (browser-native) |
-| Auth | bcrypt password hashing + email OTP |
+| Auth | bcrypt password hashing |
 
 > Note: SMS features are intentionally **not** included per requirements — notifications use email + in-app alerts.
 

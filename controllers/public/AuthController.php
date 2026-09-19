@@ -32,27 +32,6 @@ class AuthController extends \Controller {
         redirect(url('auth/login'));
     }
 
-    public function showOTP() {
-        $this->viewPublic('auth/otp', ['title' => 'OTP Login']);
-    }
-
-    public function verifyOTP() {
-        $data = $this->getInput();
-        $validator = new \Validator();
-        $result = $validator->validate($data, [
-            'email' => 'required|email',
-            'otp' => 'required|numeric|digits:6',
-        ]);
-
-        if ($result !== true || !\Auth::attemptOTP($data['email'], $data['otp'])) {
-            flash('error', 'Invalid OTP or OTP has expired.');
-            redirect(url('auth/otp'));
-        }
-
-        flash('success', 'Login successful!');
-        $this->redirectToDashboard();
-    }
-
     public function showRegister() {
         $this->viewPublic('auth/register', ['title' => 'Register']);
     }
