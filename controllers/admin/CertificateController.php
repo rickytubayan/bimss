@@ -116,4 +116,117 @@ class CertificateController extends \Controller {
         flash('success', 'Certificate signed and released.');
         redirect(admin_url('certificates'));
     }
+
+    public function edit($id) {
+        $db = $this->db;
+        $stmt = $db->prepare("
+            SELECT c.*, dr.id AS request_id, dr.resident_id, dr.document_type_id, dr.status AS request_status,
+                   dr.purpose AS request_purpose, dr.tracking_code
+            FROM certificates c
+            JOIN document_requests dr ON dr.id = c.request_id
+            WHERE c.id = ? AND c.deleted_at IS NULL
+        ");
+        $stmt->execute([$id]);
+        $cert = $stmt->fetch();
+        if (!$cert) {
+            flash('error', 'Certificate not found.');
+            redirect(admin_url('certificates'));
+        }
+
+        $residents = $db->query("SELECT id, first_name, last_name FROM residents WHERE deleted_at IS NULL AND status = 'active' ORDER BY last_name, first_name")->fetchAll();
+        $docTypes = $db->query("SELECT id, name, fee FROM document_types WHERE deleted_at IS NULL AND category = 'certificate' AND is_active = 1 ORDER BY name")->fetchAll();
+
+        $this->viewAdmin('certificates/edit', [
+            'title' => 'Edit Certificate ' . ($cert['tracking_code'] ?? ('#' . $cert['id'])),
+            'certificate' => $cert,
+            'residents' => $residents,
+            'docTypes' => $docTypes,
+        ]);
+    }
+
+    public function update($id) {
+        $db = $this->db;
+        $stmt = $db->prepare("SELECT c.request_id FROM certificates c WHERE c.id = ? AND c.deleted_at IS NULL");
+        $stmt->execute([$id]);
+        $cert = $stmt->fetch();
+        if (!$cert) {
+            flash('error', 'Certificate not found.');
+            redirect(admin_url('certificates'));
+        }
+
+        $input = $this->getInput();
+        $errors = [];
+        if (empty($input['resident_id'] ?? '')) $errors[] = 'Resident is required.';
+        if (empty($input['certificate_type'] ?? '')) $errors[] = 'Certificate type is required.';
+        if (!empty($errors)) {
+            set_old_input($input);
+            flash('error', implode(' ', $errors));
+            redirect(admin_url('certificates/' . $id . '/edit'));
+        }
+
+        $docTypeId = $input['document_type_id'] ?? null;
+        if (!$docTypeId) {
+            $dt = $db->prepare("SELECT id FROM document_types WHERE category = 'certificate' AND name LIKE ? AND deleted_at IS NULL LIMIT 1");
+            $dt->execute(["%" . $input['certificate_type'] . "%"]);
+            $docType = $dt->fetch();
+            $docTypeId = $docType['id'] ?? 1;
+        }
+        $requestStatus = in_array($input['request_status'] ?? '', ['pending', 'processing', 'for_signing', 'ready', 'released', 'cancelled'], true) ? $input['request_status'] : 'processing';
+
+        $upd = $db->prepare("UPDATE certificates SET certificate_type = ?, purpose = ?, or_number = ?, amount = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL");
+        $upd->execute([
+            $input['certificate_type'],
+            $input['purpose'] ?? '',
+            $input['or_number'] !== '' ? $input['or_number'] : null,
+            $input['amount'] ?? 0,
+            $id,
+        ]);
+
+        $drUpd = $db->prepare("UPDATE document_requests SET resident_id = ?, document_type_id = ?, purpose = ?, status = ?, updated_at = NOW() WHERE id = ?");
+        $drUpd->execute([
+            $input['resident_id'],
+            $docTypeId,
+            $input['purpose'] ?? '',
+            $requestStatus,
+            $cert['request_id'],
+        ]);
+
+        flash('success', 'Certificate updated successfully.');
+        redirect(admin_url('certificates/' . $id));
+    }
+
+    public function show($id) {
+        $db = $this->db;
+        $stmt = $db->prepare("
+            SELECT c.*, dr.tracking_code, dr.status AS request_status, dr.purpose AS request_purpose,
+                   dt.name AS type_name, CONCAT(r.first_name, ' ', r.last_name) AS resident_name,
+                   r.id AS resident_id, p.name AS purok_name, h.house_number, h.street
+            FROM certificates c
+            JOIN document_requests dr ON dr.id = c.request_id
+            JOIN document_types dt ON dt.id = dr.document_type_id
+            JOIN residents r ON r.id = dr.resident_id
+            LEFT JOIN puroks p ON p.id = r.purok_id
+            LEFT JOIN households h ON h.id = r.household_id
+            WHERE c.id = ? AND c.deleted_at IS NULL
+        ");
+        $stmt->execute([$id]);
+        $cert = $stmt->fetch();
+        if (!$cert) {
+            flash('error', 'Certificate not found.');
+            redirect(admin_url('certificates'));
+        }
+
+        $this->viewAdmin('certificates/show', [
+            'title' => 'Certificate ' . ($cert['tracking_code'] ?? ('#' . $cert['id'])),
+            'certificate' => $cert,
+        ]);
+    }
+
+    public function delete($id) {
+        $db = $this->db;
+        $stmt = $db->prepare("UPDATE certificates SET deleted_at = NOW(), updated_at = NOW() WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([$id]);
+        flash('success', 'Certificate deleted.');
+        redirect(admin_url('certificates'));
+    }
 }

@@ -82,6 +82,10 @@ class App {
             $r->get('certificates/create', 'Admin\CertificateController@create');
             $r->post('certificates/store', 'Admin\CertificateController@store');
             $r->post('certificates/sign/{id}', 'Admin\CertificateController@sign');
+            $r->get('certificates/{id}', 'Admin\CertificateController@show');
+            $r->get('certificates/{id}/edit', 'Admin\CertificateController@edit');
+            $r->post('certificates/{id}/update', 'Admin\CertificateController@update');
+            $r->post('certificates/{id}/delete', 'Admin\CertificateController@delete');
 
             $r->get('appointments', 'Admin\AppointmentController@index');
             $r->get('appointments/{id}', 'Admin\AppointmentController@show');

@@ -59,12 +59,18 @@ $typeColors = ['residency'=>'primary','indigency'=>'success','good_moral'=>'info
                         </td>
                         <td class="text-end">
                             <div class="table-actions justify-content-end">
+                                <a href="<?= admin_url('certificates/' . $c['id']) ?>" class="btn btn-sm btn-outline-secondary" title="View"><i class="bi bi-eye"></i></a>
+                                <a href="<?= admin_url('certificates/' . $c['id'] . '/edit') ?>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
                                 <?php if (!in_array($c['request_status'], ['released', 'cancelled'])): ?>
                                     <form method="POST" action="<?= admin_url('certificates/sign/' . $c['id']) ?>" class="d-inline" onsubmit="return confirm('Sign and release this certificate?');">
                                         <?= CSRF::field() ?>
                                         <button type="submit" class="btn btn-sm btn-outline-success" title="Sign & Release"><i class="bi bi-pen"></i></button>
                                     </form>
                                 <?php endif; ?>
+                                <form method="POST" action="<?= admin_url('certificates/' . $c['id'] . '/delete') ?>" class="d-inline" onsubmit="return confirm('Delete this certificate?');">
+                                    <?= CSRF::field() ?>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
                             </div>
                         </td>
                     </tr>
