@@ -185,8 +185,8 @@ class App {
             $r->get('notifications', 'Admin\NotificationController@index');
             $r->post('notifications/mark-read/{id}', 'Admin\NotificationController@markRead');
             $r->post('notifications/broadcast', 'Admin\NotificationController@broadcast');
-            $r->get('emergency/send', 'Admin\NotificationController@emergencyForm');
-            $r->post('emergency/send', 'Admin\NotificationController@sendEmergency');
+            $r->get('notifications/emergency/send', 'Admin\NotificationController@emergencyForm');
+            $r->post('notifications/emergency/send', 'Admin\NotificationController@sendEmergency');
 
             $r->get('settings', 'Admin\SettingsController@index');
             $r->post('settings/update', 'Admin\SettingsController@update');
