@@ -1959,9 +1959,11 @@ JOIN (
     SELECT 'Purok 1' name, 'P1' code, 'purok' type, 'urban' classification UNION ALL
     SELECT 'Purok 2', 'P2', 'purok', 'urban' UNION ALL
     SELECT 'Purok 3', 'P3', 'purok', 'rural' UNION ALL
-    SELECT 'Sitio Mabini', 'S1', 'sitio', 'rural' UNION ALL
-    SELECT 'Sitio Bonifacio', 'S2', 'sitio', 'urban' UNION ALL
-    SELECT 'Zone 5', 'Z5', 'zone', 'urban'
+    SELECT 'Purok 4', 'P4', 'purok', 'rural' UNION ALL
+    SELECT 'Purok 5', 'P5', 'purok', 'urban' UNION ALL
+    SELECT 'Purok 6', 'P6', 'purok', 'rural' UNION ALL
+    SELECT 'Purok 7', 'P7', 'purok', 'urban' UNION ALL
+    SELECT 'Purok 8', 'P8', 'purok', 'rural'
 ) p
 WHERE b.name = 'Napnapan Norte'
   AND NOT EXISTS (SELECT 1 FROM puroks pk WHERE pk.name = p.name LIMIT 1);
