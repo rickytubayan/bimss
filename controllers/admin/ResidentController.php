@@ -17,9 +17,9 @@ class ResidentController extends \Controller {
         $params = [];
 
         if ($search !== '') {
-            $where .= " AND (r.first_name LIKE ? OR r.last_name LIKE ? OR r.middle_name LIKE ? OR r.national_id LIKE ?)";
+            $where .= " AND (r.first_name LIKE ? OR r.last_name LIKE ? OR r.middle_name LIKE ? OR r.national_id LIKE ? OR CONCAT(r.first_name, ' ', r.last_name) LIKE ? OR CONCAT_WS(' ', r.first_name, r.middle_name, r.last_name, r.suffix) LIKE ?)";
             $like = "%{$search}%";
-            array_push($params, $like, $like, $like, $like);
+            array_push($params, $like, $like, $like, $like, $like, $like);
         }
         if ($status !== '') {
             $where .= " AND r.status = ?";
