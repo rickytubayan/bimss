@@ -1,5 +1,6 @@
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">Appointments</h4>
+    <a href="<?= admin_url('appointments/create') ?>" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Add Appointment</a>
 </div>
 
 <div class="card shadow-sm">
@@ -68,6 +69,12 @@
                                             </button>
                                         </form>
                                     <?php endif; ?>
+                                    <form action="<?= admin_url('appointments/' . $apt['id'] . '/delete') ?>" method="POST" class="d-inline">
+                                        <?= CSRF::field() ?>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this appointment?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

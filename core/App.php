@@ -88,11 +88,14 @@ class App {
             $r->post('certificates/{id}/delete', 'Admin\CertificateController@delete');
 
             $r->get('appointments', 'Admin\AppointmentController@index');
+            $r->get('appointments/create', 'Admin\AppointmentController@create');
+            $r->post('appointments/store', 'Admin\AppointmentController@store');
+            $r->get('appointments/slots', 'Admin\AppointmentController@slots');
+            $r->post('appointments/slots/store', 'Admin\AppointmentController@storeSlot');
             $r->get('appointments/{id}', 'Admin\AppointmentController@show');
             $r->post('appointments/{id}/complete', 'Admin\AppointmentController@complete');
             $r->post('appointments/{id}/cancel', 'Admin\AppointmentController@cancel');
-            $r->get('appointments/slots', 'Admin\AppointmentController@slots');
-            $r->post('appointments/slots/store', 'Admin\AppointmentController@storeSlot');
+            $r->post('appointments/{id}/delete', 'Admin\AppointmentController@delete');
 
             $r->get('finance', 'Admin\FinanceController@index');
             $r->get('finance/income', 'Admin\FinanceController@income');
