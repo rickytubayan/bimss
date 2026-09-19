@@ -79,7 +79,7 @@ function admin_nav_active($uri, $prefix) { return str_contains($uri, $prefix) ? 
                 <a class="nav-link <?= admin_nav_active($currentUri, '/settings') ?>" href="<?= admin_url('settings') ?>"><i class="bi bi-gear sidebar-icon"></i> Settings</a>
             </div>
         </div>
-        <div class="admin-sidebar-foot small text-white-50 px-3 py-2">BIMS v1.0.0</div>
+        <div class="admin-sidebar-foot small text-white-50 px-3 py-2">BIMS v1.1.1</div>
     </div>
 
     <!-- Main area -->

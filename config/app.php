@@ -2,7 +2,7 @@
 return [
     'name' => 'BIMS',
     'full_name' => 'Barangay Information Management System',
-    'version' => '1.0.0',
+    'version' => '1.1.1',
     'url' => 'http://localhost/BIMSS',
     'admin_url' => 'http://localhost/BIMSS/admin',
     'public_url' => 'http://localhost/BIMSS',

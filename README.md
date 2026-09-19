@@ -113,7 +113,7 @@ BIMSS/
 │   ├── css/               # main, public-portal, admin, accessibility, kiosk
 │   ├── js/                # app, accessibility, tts, voice
 │   └── uploads/           # complaints, dana, profiles
-├── migrations/            # 001_full_schema.sql (86 tables + seed data)
+├── migrations/            # 001_full_schema.sql (84 tables + seed data)
 ├── lang/                  # en, fil, bis, ilc, bic translation files
 └── DEFAULT_ACCOUNTS.txt
 ```
@@ -155,11 +155,11 @@ Currently implemented/skeleton:
 |--------|--------|
 | Core framework, Auth, RBAC | ✅ Done |
 | Layouts, CSS (Bootstrap 5), accessibility JS | ✅ Done |
-| Residents | ✅ Full CRUD (search, filter, pagination, soft delete) |
+| Residents | ✅ Full CRUD (search, filter, pagination, soft delete, full-name search) |
 | Households | ✅ Full CRUD (list, add, edit, show, soft delete, search/filter) |
-| Clearances | ✅ Workflow (process → sign → release) |
-| Certificates | ✅ Create + sign/release, resident lookup |
-| Appointments | ✅ List/show/complete/cancel + slot management |
+| Clearances | ✅ Full workflow (create, edit, delete, process → sign → release) |
+| Certificates | ✅ Full CRUD (create, view, edit, delete, sign/release) |
+| Appointments | ✅ Full workflow (book, list, show, complete, cancel, delete) + slot management |
 | Bulletins | ✅ Create/list/delete with category + pin |
 | Finance | ✅ Income, expenses, and official receipts (record, list, auto receipt #) |
 | Budget | ✅ Create budget + line items, overview list, detail with utilization/balance |
@@ -271,11 +271,32 @@ The `/admin/notifications` page only rendered the generic "Under Construction" p
 ### 27. Settings & User Management module — "Under Construction" stub replaced
 The `/admin/settings` page only rendered the generic "Under Construction" placeholder. Implemented the module in two parts: (1) **General/barangay settings** — a form for the system name and barangay information (name, code, municipality, province, region) that persists by rewriting `config/app.php` (the app already reads barangay info from that file in `HouseholdController` and `EvacuationController`, so a saved barangay name immediately feeds the record-linking fallbacks with no other changes); kept the write in place without a settings table, matching the existing config-driven design. (2) **User management** (`/admin/settings/users`) — a stats overview (total accounts, officials, residents, roles in use), a searchable/filterable user table with role & status badges, last login, and a create-user form (username, email, first/last name, password with confirmation, role, status) that validates uniqueness and bcrypt-hashes the password via the `User` model. No schema changes were needed — the `users` table already exists and the settings permission (`view`/`edit`) maps to module `settings`, so the routes were already RBAC-correct.
 
+### 28. Edit forms for Residents and Households were blank
+**Bug:** Opening a resident or household in edit mode showed an empty form. The shared `_form.php` views used plain helper functions (`rf()`, `hf()`) defined at view scope, but PHP's function lookup is global — those functions could never see the controller's local `$r`/`$h` record variable, so every field defaulted to empty.
+**Fix:** Bound the helpers to the record via closures (`$rf = function ($key) use ($r) {...}` / `$hf = function ($key) use ($h) {...}`) and updated every `rf(...)`/`hf(...)` call site. Edit forms now pre-fill correctly. The same closure-prefill pattern is used by all newer forms.
+
+### 29. Appointments module — add/delete functions missing & slots page shadowed by route order
+The `/admin/appointments` module had list/show/complete/cancel and slot management but no way to **book** an appointment. Added a `create()`/`store()` pair (resident + open-slot dropdowns, capacity validation, queue-number assignment, transactional insert that increments the slot's `current_booked` and flips the slot to `full` at capacity) and a `delete()` (soft delete that releases the slot's capacity again). Two route issues were also fixed: the router matches in registration order, so `appointments/{id}` was capturing `appointments/slots` and redirecting it with "Appointment not found" — reordered so literal routes (`create`, `store`, `slots`, `slots/store`) register before the parameterized `{id}`.
+
+### 30. Public-facing service pages crashed; dashboard quick links were dead
+**Bug:** Every public stub controller (documents, appointments, complaints, profile, bulletin, blotter, transparency, tracking, map) called `viewPublic('public/home/index', ...)`, but `viewPublic()` already prepends the `public/` view prefix — the resolved path became `public/public/home/index` and every page threw `RuntimeException: View not found`. The dashboard's quick-link cards also still pointed at `href="#"`.
+**Fix:** Removed the redundant `public/` prefix from all nine stub controllers (the pages now render their "Under Construction" layout instead of fatally erroring) and wired the dashboard quick links to their real routes (`public/documents`, `public/appointments`, `public/complaints`, `public/profile`).
+
+### 31. Resident search ignored full names
+**Bug:** The residents search matched each name column individually (`first_name LIKE ?` OR `last_name LIKE ?` ...), so typing a full name like "Ana Cruz" or "Maria Dela Cruz" (first + last with a middle name in between) returned nothing.
+**Fix:** Also match the concatenated names — `CONCAT(first_name, ' ', last_name)` and `CONCAT_WS(' ', first_name, middle_name, last_name, suffix)` — so full-name searches resolve correctly (verified: "Cruz" → 4, "Ana Cruz" → 1, "Maria Dela Cruz" → 1, "Juan Santos Cruz" → 1, national-ID partials, and combined with the status filter).
+
+### 32. Certificates & Clearances missing create/edit/delete actions
+Both `/admin/certificates` and `/admin/clearances` only offered read + workflow actions, so records couldn't be manipulated from the admin side when a mistake was made. Added a consistent **view / edit / delete** action set to each: certificates gained `show()`, `edit()/update()`, and `delete()` (updating both the certificate row and its joined `document_requests`); clearances gained `create()/store()` (inserting a `document_requests` row in the `clearance` category with a `CLR-*` tracking code at `pending`), `edit()/update()` (resident, document type, purpose, status, released-to, representative), and `delete()` (soft delete). Both list pages and detail headers now expose the actions.**
+
+### 33. Sample data consolidated into a single migration & table count corrected
+All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql`) was merged into `migrations/001_full_schema.sql` as an idempotent, re-runnable seed section and the `seeds/` folder removed, so the whole database is built with one command (`mysql -u root < migrations/001_full_schema.sql`). The rebuild also surfaced that two tables (`document_renewals`, `transparency_documents`) were missing from the migration's drop/recreate list — added, and the header's "86 tables" corrected to the actual **84**. The barangay name is now sourced from the settings (`config/app.php` → `barangay.name`, "Napnapan Norte") everywhere the portal and admin layouts render a title, including the login page, instead of the old "Sample Barangay" / hardcoded fallback.
+
 ---
 
 ## Database
 
-**86 tables** across 14 domain groups, defined in `migrations/001_full_schema.sql`:
+**84 tables** across 14 domain groups, defined in `migrations/001_full_schema.sql`:
 
 - Core/Auth (`users`, `roles`, `permissions`, `audit_logs`, `email_logs`)
 - Geographic/Demographic (`regions` → `barangays`, `puroks`, `households`, `residents`)
@@ -337,4 +358,4 @@ A core requirement — the system is built for users of all ages and abilities:
 
 ---
 
-*BIMS v1.0.0 — built with ❤️ for Philippine barangays.*
+*BIMS v1.1.1 — built with ❤️ for Philippine barangays.*
