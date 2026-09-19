@@ -43,18 +43,12 @@ Built with **vanilla PHP 8 + MySQL/MariaDB** (no frameworks) for easy deployment
 
 1. Copy `BIMSS` folder into `C:\xampp\htdocs\`.
 2. Start Apache + MySQL in XAMPP.
-3. Create & import the database:
+3. Create & import the database (schema + all seed/reference data):
    ```
    mysql -u root < migrations/001_full_schema.sql
-   mysql -u root bims < seeds/seed.sql
    ```
-4. *(Optional)* Load sample reference data so dropdowns/forms have selectable options (safe to re-run):
-   ```
-   mysql -u root bims < seeds/seed_reference.sql
-   mysql -u root bims < seeds/seed_health.sql
-   ```
-5. Configure DB credentials in `config/database.php` (defaults: host `localhost`, user `root`, no password, db `bims`).
-6. Open **http://localhost/BIMSS/**
+4. Configure DB credentials in `config/database.php` (defaults: host `localhost`, user `root`, no password, db `bims`).
+5. Open **http://localhost/BIMSS/**
 
 ---
 
@@ -66,6 +60,8 @@ Built with **vanilla PHP 8 + MySQL/MariaDB** (no frameworks) for easy deployment
 | captain@bims.local | captain | Captain | Full admin |
 | secretary@bims.local | secretary | Secretary | Documents/certificates |
 | treasurer@bims.local | treasurer | Treasurer | Finance/budget/tax |
+| tanod1@bims.local | tanod1 | Tanod | Peace & order |
+| tanod2@bims.local | tanod2 | Tanod | Peace & order |
 
 **Default password for all: `Admin@12345`**
 
@@ -117,10 +113,7 @@ BIMSS/
 │   ├── css/               # main, public-portal, admin, accessibility, kiosk
 │   ├── js/                # app, accessibility, tts, voice
 │   └── uploads/           # complaints, dana, profiles
-├── migrations/            # 001_full_schema.sql (86 tables)
-├── seeds/                 # seed.sql (roles, permissions, default users)
-│                          # seed_reference.sql (sample reference data)
-│                          # seed_health.sql (sample health records)
+├── migrations/            # 001_full_schema.sql (86 tables + seed data)
 ├── lang/                  # en, fil, bis, ilc, bic translation files
 └── DEFAULT_ACCOUNTS.txt
 ```
@@ -214,8 +207,8 @@ The **GPS Latitude / Longitude** inputs on the household create form were not ne
 ### 6. Household store failing — `barangay_id` could not be null
 `households.barangay_id` is `NOT NULL`, but the create form has no barangay field and the config `barangay.name` was empty, so `barangay_id` was saved as `NULL` and every insert failed with `Column 'barangay_id' cannot be null`. `extractData()` now resolves `barangay_id` from the selected **purok** first (falling back to the config-based lookup), so households linked to a Purok/Sitio save correctly.
 
-### 7. Sample reference data for testing (`seeds/seed_reference.sql`)
-Added an idempotent, re-runnable seed that populates a sample geography tree (region → province → city → barangay → puroks), households, residents (+ resident links), a chart of accounts, appointment slots, health programs, notification templates, and lupon members — so every admin form's dropdowns have selectable options during development.
+### 7. Sample reference data for testing
+Added idempotent, re-runnable reference data that populates a sample geography tree (region → province → city → barangay → puroks), households, residents (+ resident links), a chart of accounts, appointment slots, health programs, notification templates, and lupon members — so every admin form's dropdowns have selectable options during development. This data lives in the database migration (`migrations/001_full_schema.sql`).
 
 ### 8. Finance module — "Under Construction" stub replaced
 The `/admin/finance` page only rendered an "Under Construction" stub even though routes existed for income, expenses, and receipts. Implemented the full Finance module: an overview dashboard (income, expenses, net position, receipt count), record forms + lists for income and expenses, and official-receipt generation with auto-incrementing receipt numbers (validation + database inserts for `income_records`, `expense_records`, and `official_receipts`).
@@ -230,7 +223,7 @@ The `/admin/tax` page was a stub. Implemented the module: overview stats, a tax 
 The `/admin/health` page was a stub. Implemented the module: an overview dashboard with health stats (pregnant women, maternal/immunization/growth/surveillance counts, programs), a disease-surveillance feed, and CRUD-style record pages for maternal care, immunization, child growth, and disease surveillance (validation + inserts against their tables). Health pages were redesigned to match the other admin modules (stats cards + tables on the overview; side-by-side form + table on the record pages).
 
 ### 12. Health module showing empty dashboard — sample data seed
-After implementation, `/admin/health` (and its record dropdowns) had nothing to show because all residents were soft-deleted during earlier test-data cleanup. Added `seeds/seed_health.sql` (idempotent, safe to re-run) that restores the soft-deleted residents, adds a sample family, and seeds maternal, immunization, child-growth, and disease-surveillance records plus health programs — so every page and form dropdown is populated during development.
+After implementation, `/admin/health` (and its record dropdowns) had nothing to show because all residents were soft-deleted during earlier test-data cleanup. Added idempotent sample health data (a sample family plus maternal, immunization, child-growth, and disease-surveillance records and health programs) so every page and form dropdown is populated during development. This data lives in the database migration (`migrations/001_full_schema.sql`).
 
 ### 13. Admin page rendered as a bare fragment (missing layout)
 `Controller::view()` runs `extract($data)` before resolving the layout. Any controller passing a top-level view-variable named `data` (e.g. `'data' => $stats`) silently overwrote the method's own `$data` variable, making `$data['layout']` null — the page then echoed only the view content with no admin layout/sidebar. Renamed the offending key in `HealthController::index()` to `stats` so the layout resolves; this also prevents the same footgun for any future/other pages using a `data` key.

@@ -9,6 +9,8 @@ admin@bims.local          | admin      | Captain        | Full admin access
 captain@bims.local        | captain    | Captain        | Full admin access
 secretary@bims.local      | secretary  | Secretary      | Documents, certificates, records
 treasurer@bims.local      | treasurer  | Treasurer      | Finance, budget, tax
+tanod1@bims.local         | tanod1     | Tanod          | Peace & order (roster/assignments)
+tanod2@bims.local         | tanod2     | Tanod          | Peace & order (roster/assignments)
 
 LOGIN URLS
 ================================

@@ -94,7 +94,7 @@ class EvacuationController extends \Controller {
         }
         if (!$barangayId) {
             set_old_input($input);
-            flash('error', 'No barangay found. Please seed geographic reference data first.');
+            flash('error', 'No barangay found. Import the database migration to create geographic reference data.');
             redirect(admin_url('evacuation'));
         }
 

@@ -1,7 +1,9 @@
 -- ============================================================
 -- BARANGAY INFORMATION MANAGEMENT SYSTEM (BIMS)
--- Complete Database Schema
+-- Complete Database Schema + Seed Data
 -- Target: MySQL/MariaDB (InnoDB, utf8mb4_unicode_ci)
+-- Single import: creates the schema AND all sample/default data
+-- required by the system (no separate seed files needed).
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS `bims`
@@ -383,6 +385,7 @@ CREATE TABLE `vehicles` (
 -- D. DOCUMENT REQUESTS & CERTIFICATES
 -- ============================================================
 
+DROP TABLE IF EXISTS `document_renewals`;
 DROP TABLE IF EXISTS `approval_workflow`;
 DROP TABLE IF EXISTS `certificates`;
 DROP TABLE IF EXISTS `business_clearances`;
@@ -1706,6 +1709,8 @@ CREATE TABLE `notification_templates` (
 -- N. TRANSPARENCY
 -- ============================================================
 
+DROP TABLE IF EXISTS `transparency_documents`;
+
 CREATE TABLE `transparency_documents` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `document_type` ENUM('budget','income_expenditure','nta_utilization','procurement','awards','monthly_collections','annual_report') NOT NULL,
@@ -1731,5 +1736,576 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
 -- END OF SCHEMA
--- Total: 86 tables
+-- Total: 84 tables
+-- ============================================================
+
+-- ============================================================
+-- E. SEED / SAMPLE DATA
+-- ============================================================
+-- All data the system needs is imported here so the application
+-- only reads from the database. The separate seeds/ files have
+-- been merged into this migration. Idempotent: INSERT IGNORE +
+-- WHERE NOT EXISTS guards keep this safe to re-run over an
+-- existing database without duplicating rows.
+-- ============================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- =====================================================
+-- 1. ROLES
+-- =====================================================
+INSERT IGNORE INTO roles (id, name, description, is_system, created_at, updated_at) VALUES
+(1, 'captain', 'Punong Barangay - Full access, view-only on financial approvals', 1, NOW(), NOW()),
+(2, 'kagawad', 'Barangay Kagawad - Committee access', 1, NOW(), NOW()),
+(3, 'secretary', 'Barangay Secretary - Documents, certificates, records', 1, NOW(), NOW()),
+(4, 'treasurer', 'Barangay Treasurer - Finance, budget, tax', 1, NOW(), NOW()),
+(5, 'bhw', 'Barangay Health Worker - Health module', 1, NOW(), NOW()),
+(6, 'tanod', 'Barangay Tanod - Peace and order', 1, NOW(), NOW()),
+(7, 'census', 'Census Officer - Demographics, households', 1, NOW(), NOW()),
+(8, 'sk_chair', 'Sangguniang Kabataan Chairman - Youth programs', 1, NOW(), NOW()),
+(9, 'resident', 'Registered citizen resident', 1, NOW(), NOW());
+
+-- =====================================================
+-- 2. PERMISSIONS
+-- =====================================================
+INSERT IGNORE INTO permissions (module, action, description, created_at, updated_at) VALUES
+-- Residents module
+('residents', 'view', 'View resident records', NOW(), NOW()),
+('residents', 'create', 'Create resident records', NOW(), NOW()),
+('residents', 'edit', 'Edit resident records', NOW(), NOW()),
+('residents', 'delete', 'Delete resident records', NOW(), NOW()),
+('residents', 'export', 'Export resident data', NOW(), NOW()),
+-- Households module
+('households', 'view', 'View households', NOW(), NOW()),
+('households', 'create', 'Create households', NOW(), NOW()),
+('households', 'edit', 'Edit households', NOW(), NOW()),
+('households', 'delete', 'Delete households', NOW(), NOW()),
+-- Certificates module
+('certificates', 'view', 'View certificates', NOW(), NOW()),
+('certificates', 'create', 'Create certificates', NOW(), NOW()),
+('certificates', 'edit', 'Edit certificates', NOW(), NOW()),
+('certificates', 'approve', 'Approve certificates', NOW(), NOW()),
+-- Finance module
+('finance', 'view', 'View finance records', NOW(), NOW()),
+('finance', 'create', 'Create finance records', NOW(), NOW()),
+('finance', 'edit', 'Edit finance records', NOW(), NOW()),
+('finance', 'approve', 'Approve financial transactions', NOW(), NOW()),
+('finance', 'export', 'Export financial data', NOW(), NOW()),
+-- Budget module
+('budget', 'view', 'View budget', NOW(), NOW()),
+('budget', 'create', 'Create budget', NOW(), NOW()),
+('budget', 'edit', 'Edit budget', NOW(), NOW()),
+('budget', 'approve', 'Approve budget', NOW(), NOW()),
+-- Tax module
+('tax', 'view', 'View tax ledger', NOW(), NOW()),
+('tax', 'create', 'Create tax records', NOW(), NOW()),
+('tax', 'edit', 'Edit tax records', NOW(), NOW()),
+-- Health module
+('health', 'view', 'View health records', NOW(), NOW()),
+('health', 'create', 'Create health records', NOW(), NOW()),
+('health', 'edit', 'Edit health records', NOW(), NOW()),
+-- Seniors/PWD module
+('seniors', 'view', 'View senior/PWD records', NOW(), NOW()),
+('seniors', 'create', 'Create senior/PWD records', NOW(), NOW()),
+('seniors', 'edit', 'Edit senior/PWD records', NOW(), NOW()),
+-- Peace & Order
+('peace_order', 'view', 'View peace and order records', NOW(), NOW()),
+('peace_order', 'create', 'Create blotter records', NOW(), NOW()),
+('peace_order', 'edit', 'Edit blotter records', NOW(), NOW()),
+-- Lupon
+('lupon', 'view', 'View Lupon cases', NOW(), NOW()),
+('lupon', 'create', 'Create KP cases', NOW(), NOW()),
+('lupon', 'edit', 'Edit KP cases', NOW(), NOW()),
+('lupon', 'approve', 'Approve settlements/CFA', NOW(), NOW()),
+-- DRRM
+('drrm', 'view', 'View DRRM records', NOW(), NOW()),
+('drrm', 'create', 'Create DRRM records', NOW(), NOW()),
+('drrm', 'edit', 'Edit DRRM records', NOW(), NOW()),
+('drrm', 'approve', 'Approve DRRM actions', NOW(), NOW()),
+-- Assets
+('assets', 'view', 'View assets', NOW(), NOW()),
+('assets', 'create', 'Create assets', NOW(), NOW()),
+('assets', 'edit', 'Edit assets', NOW(), NOW()),
+-- Compliance
+('compliance', 'view', 'View compliance records', NOW(), NOW()),
+('compliance', 'create', 'Create compliance docs', NOW(), NOW()),
+('compliance', 'edit', 'Edit compliance records', NOW(), NOW()),
+-- Reports
+('reports', 'view', 'View reports', NOW(), NOW()),
+('reports', 'create', 'Generate reports', NOW(), NOW()),
+('reports', 'export', 'Export reports', NOW(), NOW()),
+-- Notifications
+('notifications', 'view', 'View notifications', NOW(), NOW()),
+('notifications', 'create', 'Send notifications', NOW(), NOW()),
+('notifications', 'send_emergency', 'Send emergency alerts', NOW(), NOW()),
+-- Bulletins
+('bulletins', 'view', 'View bulletins', NOW(), NOW()),
+('bulletins', 'create', 'Create bulletins', NOW(), NOW()),
+('bulletins', 'edit', 'Edit bulletins', NOW(), NOW()),
+('bulletins', 'delete', 'Delete bulletins', NOW(), NOW()),
+-- Settings
+('settings', 'view', 'View settings', NOW(), NOW()),
+('settings', 'edit', 'Edit settings', NOW(), NOW());
+
+-- =====================================================
+-- 3. ROLE PERMISSIONS
+-- =====================================================
+-- Captain: all permissions
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r CROSS JOIN permissions p
+WHERE r.name = 'captain';
+
+-- Secretary: residents, households, certificates, compliance, reports, notifications, bulletins
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r JOIN permissions p ON 1=1
+WHERE r.name = 'secretary' AND p.module IN ('residents','households','certificates','compliance','reports','notifications','bulletins','settings')
+AND p.action IN ('view','create','edit','export');
+
+-- Treasurer: finance, budget, tax, reports
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r JOIN permissions p ON 1=1
+WHERE r.name = 'treasurer' AND p.module IN ('finance','budget','tax','reports')
+AND p.action IN ('view','create','edit','export');
+
+-- BHW: health, seniors
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r JOIN permissions p ON 1=1
+WHERE r.name = 'bhw' AND p.module IN ('health','seniors')
+AND p.action IN ('view','create','edit');
+
+-- Tanod: peace_order, lupon (view), drrm (view)
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r JOIN permissions p ON 1=1
+WHERE r.name = 'tanod' AND (
+    (p.module = 'peace_order' AND p.action IN ('view','create','edit'))
+    OR (p.module = 'lupon' AND p.action = 'view')
+    OR (p.module = 'drrm' AND p.action IN ('view','create'))
+);
+
+-- Census: residents, households
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r JOIN permissions p ON 1=1
+WHERE r.name = 'census' AND p.module IN ('residents','households')
+AND p.action IN ('view','create','edit','export');
+
+-- SK Chair: budget (view), reports
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r JOIN permissions p ON 1=1
+WHERE r.name = 'sk_chair' AND p.module IN ('budget','reports') AND p.action = 'view';
+
+-- Kagawad: view majority
+INSERT IGNORE INTO role_permissions (role_id, permission_id, created_at, updated_at)
+SELECT r.id, p.id, NOW(), NOW()
+FROM roles r JOIN permissions p ON 1=1
+WHERE r.name = 'kagawad' AND p.action = 'view';
+
+-- =====================================================
+-- 4. DEFAULT USERS (Password: Admin@12345 (default) - bcrypt hash)
+-- =====================================================
+INSERT IGNORE INTO users (username, email, password_hash, first_name, last_name, role, status, email_verified_at, created_at, updated_at) VALUES
+('captain', 'captain@bims.local', '$2y$10$3eSmRjKExTbqqK14ue2/refx5BkP/jQtXfboygid17X7OKpbHY23K', 'Punong', 'Barangay', 'captain', 'active', NOW(), NOW(), NOW()),
+('secretary', 'secretary@bims.local', '$2y$10$3eSmRjKExTbqqK14ue2/refx5BkP/jQtXfboygid17X7OKpbHY23K', 'Barangay', 'Secretary', 'secretary', 'active', NOW(), NOW(), NOW()),
+('treasurer', 'treasurer@bims.local', '$2y$10$3eSmRjKExTbqqK14ue2/refx5BkP/jQtXfboygid17X7OKpbHY23K', 'Barangay', 'Treasurer', 'treasurer', 'active', NOW(), NOW(), NOW()),
+('admin', 'admin@bims.local', '$2y$10$3eSmRjKExTbqqK14ue2/refx5BkP/jQtXfboygid17X7OKpbHY23K', 'System', 'Administrator', 'captain', 'active', NOW(), NOW(), NOW()),
+('tanod1', 'tanod1@bims.local', '$2y$10$3eSmRjKExTbqqK14ue2/refx5BkP/jQtXfboygid17X7OKpbHY23K', 'Barangay', 'Tanod 1', 'tanod', 'active', NOW(), NOW(), NOW()),
+('tanod2', 'tanod2@bims.local', '$2y$10$3eSmRjKExTbqqK14ue2/refx5BkP/jQtXfboygid17X7OKpbHY23K', 'Barangay', 'Tanod 2', 'tanod', 'active', NOW(), NOW(), NOW());
+
+-- =====================================================
+-- 5. DOCUMENT TYPES
+-- =====================================================
+INSERT IGNORE INTO document_types (name, category, fee, requirements_json, is_active, description, created_at, updated_at) VALUES
+('Barangay Clearance', 'clearance', 50.00, '["Valid ID", "Proof of Residency"]', 1, 'Standard barangay clearance certificate', NOW(), NOW()),
+('Certificate of Indigency', 'certificate', 0.00, '["Valid ID"]', 1, 'For residents classified as indigent', NOW(), NOW()),
+('Certificate of Residency', 'certificate', 30.00, '["Valid ID", "Proof of Residence"]', 1, 'Proof of residency within the barangay', NOW(), NOW()),
+('Certificate of Good Moral Character', 'certificate', 50.00, '["Valid ID"]', 1, 'Character reference certificate', NOW(), NOW()),
+('Business Clearance', 'clearance', 200.00, '["Mayors Permit", "BIR Registration", "Sanitary Permit"]', 1, 'Business operation clearance', NOW(), NOW());
+
+-- =====================================================
+-- 6. DEFAULT APPOINTMENT SLOTS ARE HANDLED VIA UI
+-- =====================================================
+
+-- =====================================================
+-- 7. REFERENCE / LOOKUP DATA
+--    Fills drop-downs and reference lists so forms can be tested.
+--    Re-runnable: uses INSERT IGNORE + WHERE NOT EXISTS guards.
+-- =====================================================
+
+-- -----------------------------------------------------
+-- Administrative geography (single sample barangay tree)
+-- -----------------------------------------------------
+INSERT IGNORE INTO regions (code, name) VALUES
+('1300000000', 'NCR - National Capital Region');
+
+INSERT IGNORE INTO provinces (code, name, region_code) VALUES
+('1380000000', 'Metro Manila (NCR)', '1300000000');
+
+INSERT IGNORE INTO cities_municipalities (code, name, province_code, type) VALUES
+('1380000000', 'Manila', '1380000000', 'city');
+
+INSERT IGNORE INTO barangays (code, name, municipality_code, psgc_10digit) VALUES
+('1380010000', 'Sample Barangay', '1380000000', '1380010000');
+
+INSERT IGNORE INTO puroks (barangay_id, name, code, type, classification)
+SELECT b.id, p.name, p.code, p.type, p.classification
+FROM barangays b
+JOIN (
+    SELECT 'Purok 1' name, 'P1' code, 'purok' type, 'urban' classification UNION ALL
+    SELECT 'Purok 2', 'P2', 'purok', 'urban' UNION ALL
+    SELECT 'Purok 3', 'P3', 'purok', 'rural' UNION ALL
+    SELECT 'Sitio Mabini', 'S1', 'sitio', 'rural' UNION ALL
+    SELECT 'Sitio Bonifacio', 'S2', 'sitio', 'urban' UNION ALL
+    SELECT 'Zone 5', 'Z5', 'zone', 'urban'
+) p
+WHERE b.name = 'Sample Barangay'
+  AND NOT EXISTS (SELECT 1 FROM puroks pk WHERE pk.name = p.name LIMIT 1);
+
+-- -----------------------------------------------------
+-- Households (linked to Purok 1-3)
+-- -----------------------------------------------------
+INSERT IGNORE INTO households (barangay_id, purok_id, house_number, street, classification, status)
+SELECT b.id, p.id, h.house_number, h.street, h.classification, h.status
+FROM barangays b
+JOIN (
+    SELECT purok_name, house_number, street, classification, status FROM (
+        SELECT 'Purok 1' purok_name, '001' house_number, 'Rizal Street' street, 'residential' classification, 'active' status UNION ALL
+        SELECT 'Purok 1', '002', 'Rizal Street', 'residential', 'active' UNION ALL
+        SELECT 'Purok 2', '003', 'Bonifacio Avenue', 'commercial', 'active' UNION ALL
+        SELECT 'Purok 2', '004', 'Bonifacio Avenue', 'residential', 'vacant' UNION ALL
+        SELECT 'Purok 3', '005', 'Mabini Street', 'residential', 'active' UNION ALL
+        SELECT 'Purok 3', '006', 'Luna Street', 'mixed', 'active' UNION ALL
+        SELECT 'Purok 1', '007', 'Quezon Street', 'residential', 'active' UNION ALL
+        SELECT 'Purok 2', '008', 'Quezon Street', 'residential', 'active'
+    ) x
+) h
+JOIN puroks p ON p.barangay_id = b.id AND p.name = h.purok_name
+WHERE b.name = 'Sample Barangay'
+  AND NOT EXISTS (
+      SELECT 1 FROM households hh
+      WHERE hh.barangay_id = b.id
+        AND hh.purok_id = p.id
+        AND hh.house_number = h.house_number
+      LIMIT 1
+  );
+
+-- -----------------------------------------------------
+-- Residents (assigned to households via subqueries)
+-- -----------------------------------------------------
+INSERT IGNORE INTO residents
+    (household_id, purok_id, national_id, first_name, middle_name, last_name, suffix, sex,
+     birthdate, civil_status, blood_type, disability_type, is_pwd, is_senior, is_voter,
+     educational_attainment, occupation, monthly_income, phone, email, status, is_approved)
+SELECT hh.id, p.id, r.national_id, r.first_name, r.middle_name, r.last_name, r.suffix, r.sex,
+       r.birthdate, r.civil_status, r.blood_type, r.disability_type, r.is_pwd, r.is_senior, r.is_voter,
+       r.educational_attainment, r.occupation, r.monthly_income, r.phone, r.email, r.status, 1
+FROM (
+    SELECT 'R-2024-001' national_id, 'Juan' first_name, 'Santos' middle_name, 'Cruz' last_name, '' suffix,
+           'male' sex, '1980-04-12' birthdate, 'married' civil_status, 'O+' blood_type, 'none' disability_type,
+           0 is_pwd, 0 is_senior, 1 is_voter, 'college' educational_attainment, 'Teacher' occupation,
+           25000.00 monthly_income, '09170000001' phone, 'juan.cruz@example.com' email, 'active' status,
+           '001' hh_number, 'Purok 1' purok_name UNION ALL
+    SELECT 'R-2024-002', 'Maria', 'Cruz', 'Dela Cruz', '', 'female', '1983-09-25', 'married', 'A+', 'none',
+           0, 0, 1, 'college', 'Nurse', 30000.00, '09170000002', 'maria.dc@example.com', 'active',
+           '001', 'Purok 1' UNION ALL
+    SELECT 'R-2024-003', 'Jose', '', 'Rizal', 'Jr.', 'male', '1961-06-19', 'married', 'B+', 'none',
+           0, 1, 1, 'high_school', 'Retired', 10000.00, '09170000003', 'jose.rizal@example.com', 'active',
+           '002', 'Purok 1' UNION ALL
+    SELECT 'R-2024-004', 'Ana', '', 'Lim', '', 'female', '1995-01-30', 'single', 'AB+', 'none',
+           0, 0, 1, 'college', 'Engineer', 40000.00, '09170000004', 'ana.lim@example.com', 'active',
+           '003', 'Purok 2' UNION ALL
+    SELECT 'R-2024-005', 'Pedro', 'Garcia', 'Mendoza', '', 'male', '1972-11-08', 'married', 'O-', 'none',
+           0, 0, 1, 'college', 'Police Officer', 28000.00, '09170000005', 'pedro.mendoza@example.com', 'active',
+           '003', 'Purok 2' UNION ALL
+    SELECT 'R-2024-006', 'Liza', '', 'Reyes', '', 'female', '1988-03-14', 'married', 'A-', 'visual',
+           1, 0, 1, 'vocational', 'Seamstress', 12000.00, '09170000006', 'liza.reyes@example.com', 'active',
+           '004', 'Purok 2' UNION ALL
+    SELECT 'R-2024-007', 'Carlo', '', 'Santos', '', 'male', '1990-07-21', 'single', 'B-', 'none',
+           0, 0, 1, 'college', 'Business Owner', 50000.00, '09170000007', 'carlo.santos@example.com', 'active',
+           '005', 'Purok 3' UNION ALL
+    SELECT 'R-2024-008', 'Rosa', '', 'Aquino', '', 'female', '1958-12-02', 'widowed', 'O+', 'none',
+           0, 1, 1, 'elementary', 'Housewife', 5000.00, '09170000008', 'rosa.aquino@example.com', 'active',
+           '006', 'Purok 3' UNION ALL
+    SELECT 'R-2024-009', 'Miguel', '', 'Torres', '', 'male', '1985-08-17', 'married', 'A+', 'none',
+           0, 0, 1, 'college', 'Accountant', 35000.00, '09170000009', 'miguel.torres@example.com', 'active',
+           '007', 'Purok 1' UNION ALL
+    SELECT 'R-2024-010', 'Elena', 'Reyes', 'Garcia', '', 'female', '1978-02-28', 'married', 'B+', 'none',
+           0, 0, 1, 'college', 'Teacher', 28000.00, '09170000010', 'elena.garcia@example.com', 'active',
+           '008', 'Purok 2'
+) r
+JOIN households hh ON hh.house_number = r.hh_number
+JOIN puroks p    ON p.id = hh.purok_id AND p.name = r.purok_name
+WHERE NOT EXISTS (
+    SELECT 1 FROM residents ex WHERE ex.national_id = r.national_id
+);
+
+-- Resident links (head-spouse/child relationships for first two households)
+INSERT IGNORE INTO resident_links (resident_id_a, resident_id_b, relationship)
+SELECT a.id, b.id, link.relationship
+FROM (
+    SELECT id, first_name, last_name FROM residents WHERE national_id = 'R-2024-001' LIMIT 1
+) a
+JOIN (
+    SELECT id, first_name, last_name FROM residents WHERE national_id = 'R-2024-002' LIMIT 1
+) b
+CROSS JOIN (SELECT 'spouse' relationship) link;
+
+INSERT IGNORE INTO resident_links (resident_id_a, resident_id_b, relationship)
+SELECT a.id, b.id, 'parent'
+FROM (
+    SELECT id FROM residents WHERE national_id = 'R-2024-001' LIMIT 1
+) a
+JOIN (
+    SELECT id FROM residents WHERE national_id = 'R-2024-003' LIMIT 1
+) b;
+
+-- -----------------------------------------------------
+-- Chart of Accounts (finance/budget module lookups)
+-- -----------------------------------------------------
+INSERT IGNORE INTO chart_of_accounts (code, name, type, is_active) VALUES
+('1010', 'Cash on Hand', 'asset', 1),
+('1020', 'Cash in Bank', 'asset', 1),
+('2010', 'Accounts Payable', 'liability', 1),
+('3010', 'General Fund Balance', 'equity', 1),
+('4010', 'Real Property Tax', 'income', 1),
+('4020', 'Business Tax', 'income', 1),
+('4021', 'Revenue - Barangay Clearance', 'income', 1),
+('4022', 'Revenue - Business Clearance', 'income', 1),
+('4030', 'Donations and Contributions', 'income', 1),
+('5010', 'Personnel Services', 'expense', 1),
+('5020', 'Maintenance and Other Operating Expenses (MOOE)', 'expense', 1),
+('5030', 'Capital Outlay', 'expense', 1),
+('5040', 'Financial Expenses', 'expense', 1);
+
+-- -----------------------------------------------------
+-- Appointment slots (next 7 days, morning + afternoon)
+-- -----------------------------------------------------
+INSERT IGNORE INTO appointment_slots (slot_date, time_start, time_end, max_capacity, slot_type)
+SELECT CURDATE() + INTERVAL d.a DAY, '09:00:00', '12:00:00', 10, 'regular'
+FROM (
+    SELECT 0 a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3
+    UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6
+) d
+WHERE NOT EXISTS (
+    SELECT 1 FROM appointment_slots s
+    WHERE s.slot_date = CURDATE() + INTERVAL d.a DAY
+      AND s.time_start = '09:00:00'
+    LIMIT 1
+);
+
+INSERT IGNORE INTO appointment_slots (slot_date, time_start, time_end, max_capacity, slot_type)
+SELECT CURDATE() + INTERVAL d.a DAY, '13:00:00', '17:00:00', 10, 'regular'
+FROM (
+    SELECT 0 a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3
+    UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6
+) d
+WHERE NOT EXISTS (
+    SELECT 1 FROM appointment_slots s
+    WHERE s.slot_date = CURDATE() + INTERVAL d.a DAY
+      AND s.time_start = '13:00:00'
+    LIMIT 1
+);
+
+-- -----------------------------------------------------
+-- Health programs
+-- -----------------------------------------------------
+INSERT IGNORE INTO health_programs (name, target_group, schedule_date, attendees_count, conducted_by, notes)
+SELECT h.name, h.target_group, h.schedule_date, 0, h.conducted_by, h.notes
+FROM (
+    SELECT 'Dengue Awareness Campaign' name, 'All residents' target_group,
+           CURDATE() + INTERVAL 10 DAY schedule_date, 'RHU - Barangay Health Station' conducted_by,
+           'Community clean-up and awareness drive.' notes UNION ALL
+    SELECT 'Free Blood Pressure Clinic', 'Senior citizens',
+           CURDATE() + INTERVAL 15 DAY, 'Barangay Health Workers',
+           'Free BP monitoring and consultation.' UNION ALL
+    SELECT 'Child Immunization Day', 'Children 0-5 years',
+           CURDATE() + INTERVAL 20 DAY, 'RHU - Manila',
+           'Routine immunization for infants and children.' UNION ALL
+    SELECT 'Maternal Health Check-up', 'Pregnant women',
+           CURDATE() + INTERVAL 25 DAY, 'RHU - Manila',
+           'Prenatal check-up and counselling.'
+) h
+WHERE NOT EXISTS (SELECT 1 FROM health_programs hp WHERE hp.name = h.name LIMIT 1);
+
+-- -----------------------------------------------------
+-- Notification templates
+-- -----------------------------------------------------
+INSERT IGNORE INTO notification_templates (name, template_text, variables)
+SELECT t.name, t.template_text, t.variables
+FROM (
+    SELECT 'Emergency Alert' name,
+           'ATTENTION: Emergency in Barangay. {{message}}' template_text,
+           '["message"]' variables UNION ALL
+    SELECT 'General Announcement',
+           'Notice: {{subject}} - {{message}}',
+           '["subject","message"]' UNION ALL
+    SELECT 'Assembly Reminder',
+           'Reminder: Zone assembly on {{date}} at {{time}}. Venue: {{venue}}.',
+           '["date","time","venue"]' UNION ALL
+    SELECT 'Community Cleanup',
+           'Community cleanup this {{date}}. Please participate. Meet at {{venue}}.',
+           '["date","venue"]'
+) t
+WHERE NOT EXISTS (SELECT 1 FROM notification_templates nt WHERE nt.name = t.name LIMIT 1);
+
+-- -----------------------------------------------------
+-- Lupon members (chair, secretary, 2 members)
+-- -----------------------------------------------------
+INSERT IGNORE INTO lupon_members (resident_id, position, appointed_date, status)
+SELECT r.id, l.position, CURDATE(), 'active'
+FROM (
+    SELECT 'R-2024-001' national_id, 'chair' position UNION ALL
+    SELECT 'R-2024-002', 'secretary' UNION ALL
+    SELECT 'R-2024-004', 'member' UNION ALL
+    SELECT 'R-2024-007', 'member'
+) l
+JOIN residents r ON r.national_id = l.national_id
+WHERE NOT EXISTS (
+    SELECT 1 FROM lupon_members lm WHERE lm.resident_id = r.id AND lm.position = l.position
+);
+
+-- =====================================================
+-- 8. SAMPLE HEALTH RECORDS
+--    Idempotent, re-runnable: each sample row is guarded by
+--    a row-specific NOT EXISTS check, so re-running never
+--    duplicates existing data.
+-- =====================================================
+
+-- -----------------------------------------------------
+-- 8.1 Restore soft-deleted pre-existing residents (Juan Cruz #1, #2)
+-- -----------------------------------------------------
+UPDATE residents SET deleted_at = NULL, status = 'active' WHERE id IN (1,2) AND deleted_at IS NOT NULL;
+
+-- -----------------------------------------------------
+-- 8.2 Ensure a small sample family exists (added only if missing)
+-- -----------------------------------------------------
+INSERT INTO residents (first_name, middle_name, last_name, sex, birthdate, civil_status, is_voter, status, is_approved)
+SELECT 'Ana', 'Mae', 'Cruz', 'female', '1992-03-10', 'married', 1, 'active', 1
+WHERE NOT EXISTS (SELECT 1 FROM residents WHERE first_name = 'Ana' AND last_name = 'Cruz');
+
+INSERT INTO residents (first_name, middle_name, last_name, sex, birthdate, civil_status, is_voter, status, is_approved)
+SELECT 'Miguel', '', 'Cruz', 'male', '2024-02-20', 'single', 0, 'active', 1
+WHERE NOT EXISTS (SELECT 1 FROM residents WHERE first_name = 'Miguel' AND last_name = 'Cruz');
+
+INSERT INTO residents (first_name, middle_name, last_name, sex, birthdate, civil_status, is_voter, status, is_approved)
+SELECT 'Bella', '', 'Reyes', 'female', '2023-06-15', 'single', 0, 'active', 1
+WHERE NOT EXISTS (SELECT 1 FROM residents WHERE first_name = 'Bella' AND last_name = 'Reyes');
+
+-- -----------------------------------------------------
+-- 8.3 Maternal records (idempotent per resident)
+-- -----------------------------------------------------
+INSERT INTO maternal_records (resident_id, lmp_date, expected_due_date, complications, attending_midwife, status)
+SELECT r.id, '2026-06-01', '2027-03-08', 'Mild anemia', 'Nurse Ana Santos', 'pregnant'
+FROM residents r
+WHERE r.first_name = 'Ana' AND r.last_name = 'Cruz'
+  AND NOT EXISTS (SELECT 1 FROM maternal_records m WHERE m.resident_id = r.id)
+LIMIT 1;
+
+INSERT INTO maternal_records (resident_id, birth_weight, birth_date, complications, attending_midwife, status)
+SELECT r.id, 3.10, '2023-06-15', 'None', 'Nurse Ana Santos', 'delivered'
+FROM residents r
+WHERE r.first_name = 'Bella' AND r.last_name = 'Reyes'
+  AND NOT EXISTS (SELECT 1 FROM maternal_records m WHERE m.resident_id = r.id)
+LIMIT 1;
+
+-- -----------------------------------------------------
+-- 8.4 Immunization records (idempotent per resident/vaccine/dose)
+-- -----------------------------------------------------
+INSERT INTO immunization_records (child_resident_id, vaccine_name, dose_number, date_administered, batch_number, next_schedule, administered_by)
+SELECT r.id, 'BCG', 1, '2024-02-25', 'BCG-2418', NULL, 'Nurse Ana Santos'
+FROM residents r
+WHERE r.first_name = 'Miguel' AND r.last_name = 'Cruz'
+  AND NOT EXISTS (SELECT 1 FROM immunization_records i
+                  WHERE i.child_resident_id = r.id AND i.vaccine_name = 'BCG' AND i.dose_number = 1)
+LIMIT 1;
+
+INSERT INTO immunization_records (child_resident_id, vaccine_name, dose_number, date_administered, batch_number, next_schedule, administered_by)
+SELECT r.id, 'DPT-HepB', 2, '2024-07-01', 'DPT-3391', NULL, 'Nurse Ana Santos'
+FROM residents r
+WHERE r.first_name = 'Miguel' AND r.last_name = 'Cruz'
+  AND NOT EXISTS (SELECT 1 FROM immunization_records i
+                  WHERE i.child_resident_id = r.id AND i.vaccine_name = 'DPT-HepB' AND i.dose_number = 2)
+LIMIT 1;
+
+INSERT INTO immunization_records (child_resident_id, vaccine_name, dose_number, date_administered, batch_number, next_schedule, administered_by)
+SELECT r.id, 'MMR', 1, '2024-11-12', 'MMR-4520', '2025-05-12', 'Dr. Reyes'
+FROM residents r
+WHERE r.first_name = 'Bella' AND r.last_name = 'Reyes'
+  AND NOT EXISTS (SELECT 1 FROM immunization_records i
+                  WHERE i.child_resident_id = r.id AND i.vaccine_name = 'MMR' AND i.dose_number = 1)
+LIMIT 1;
+
+-- -----------------------------------------------------
+-- 8.5 Child growth records (idempotent per resident/age/weight)
+-- -----------------------------------------------------
+INSERT INTO child_growth_records (child_resident_id, age_months, weight_kg, height_cm, head_circumference, nutrition_status, recorded_by)
+SELECT r.id, 24, 12.10, 86.0, 48.0, 'normal', 'Nurse Ana Santos'
+FROM residents r
+WHERE r.first_name = 'Miguel' AND r.last_name = 'Cruz'
+  AND NOT EXISTS (SELECT 1 FROM child_growth_records g
+                  WHERE g.child_resident_id = r.id AND g.age_months = 24 AND g.weight_kg = 12.10)
+LIMIT 1;
+
+INSERT INTO child_growth_records (child_resident_id, age_months, weight_kg, height_cm, head_circumference, nutrition_status, recorded_by)
+SELECT r.id, 36, 13.40, 92.0, 49.0, 'normal', 'Nurse Ana Santos'
+FROM residents r
+WHERE r.first_name = 'Bella' AND r.last_name = 'Reyes'
+  AND NOT EXISTS (SELECT 1 FROM child_growth_records g
+                  WHERE g.child_resident_id = r.id AND g.age_months = 36 AND g.weight_kg = 13.40)
+LIMIT 1;
+
+INSERT INTO child_growth_records (child_resident_id, age_months, weight_kg, height_cm, head_circumference, nutrition_status, recorded_by)
+SELECT r.id, 1, 4.20, 54.0, 36.0, 'normal', 'Nurse Ana Santos'
+FROM residents r
+WHERE r.first_name = 'adw'
+  AND NOT EXISTS (SELECT 1 FROM child_growth_records g WHERE g.child_resident_id = r.id AND g.age_months = 1)
+LIMIT 1;
+
+-- -----------------------------------------------------
+-- 8.6 Disease surveillance (idempotent per disease/date/age)
+-- -----------------------------------------------------
+INSERT INTO disease_surveillance (disease_name, date_reported, purok_id, patient_age, patient_sex, status, reported_to_doctor, notes)
+SELECT 'dengue', '2026-08-20', NULL, 5, 'male', 'confirmed', 1, 'Admitted; recovered after 3 days'
+WHERE NOT EXISTS (SELECT 1 FROM disease_surveillance s WHERE s.disease_name = 'dengue' AND s.date_reported = '2026-08-20');
+
+INSERT INTO disease_surveillance (disease_name, date_reported, purok_id, patient_age, patient_sex, status, reported_to_doctor, notes)
+SELECT 'influenza', '2026-09-01', NULL, 34, 'female', 'suspected', 0, 'Monitoring at home'
+WHERE NOT EXISTS (SELECT 1 FROM disease_surveillance s WHERE s.disease_name = 'influenza' AND s.date_reported = '2026-09-01');
+
+INSERT INTO disease_surveillance (disease_name, date_reported, purok_id, patient_age, patient_sex, status, reported_to_doctor, notes)
+SELECT 'acute diarrhea', '2026-08-15', NULL, 2, 'male', 'recovered', 1, 'ORs given'
+WHERE NOT EXISTS (SELECT 1 FROM disease_surveillance s WHERE s.disease_name = 'acute diarrhea' AND s.date_reported = '2026-08-15');
+
+INSERT INTO disease_surveillance (disease_name, date_reported, purok_id, patient_age, patient_sex, status, reported_to_doctor, notes)
+SELECT 'leptospirosis', '2026-08-28', NULL, 40, 'male', 'suspected', 1, 'Flood exposure; referred'
+WHERE NOT EXISTS (SELECT 1 FROM disease_surveillance s WHERE s.disease_name = 'leptospirosis' AND s.date_reported = '2026-08-28');
+
+-- -----------------------------------------------------
+-- 8.7 Health programs (idempotent per name/date)
+-- -----------------------------------------------------
+INSERT INTO health_programs (name, target_group, schedule_date, attendees_count, conducted_by, notes)
+SELECT 'Prenatal Checkup Drive', 'Pregnant women', '2026-08-20', 24, 'Rural Health Unit', 'Monthly prenatal visit'
+WHERE NOT EXISTS (SELECT 1 FROM health_programs p WHERE p.name = 'Prenatal Checkup Drive' AND p.schedule_date = '2026-08-20');
+
+INSERT INTO health_programs (name, target_group, schedule_date, attendees_count, conducted_by, notes)
+SELECT 'Child Nutrition Assessment', 'Children 0-5', '2026-08-30', 18, 'BHW Isabel', 'Weighing + deworming'
+WHERE NOT EXISTS (SELECT 1 FROM health_programs p WHERE p.name = 'Child Nutrition Assessment' AND p.schedule_date = '2026-08-30');
+
+INSERT INTO health_programs (name, target_group, schedule_date, attendees_count, conducted_by, notes)
+SELECT 'Dengue Awareness Campaign', 'All residents', '2026-09-10', 0, 'BHW Isabel', 'House-to-house info drive'
+WHERE NOT EXISTS (SELECT 1 FROM health_programs p WHERE p.name = 'Dengue Awareness Campaign' AND p.schedule_date = '2026-09-10');
+
+INSERT INTO health_programs (name, target_group, schedule_date, attendees_count, conducted_by, notes)
+SELECT 'National Immunization Day', 'Children 0-5', '2026-09-15', 0, 'Rural Health Unit', 'Free vaccines at barangay hall'
+WHERE NOT EXISTS (SELECT 1 FROM health_programs p WHERE p.name = 'National Immunization Day' AND p.schedule_date = '2026-09-15');
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- END OF SEED DATA
 -- ============================================================
