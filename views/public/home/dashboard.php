@@ -6,25 +6,25 @@
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <a href="#" class="card text-center text-decoration-none shadow-sm h-100 p-3">
+        <a href="<?= url('public/documents') ?>" class="card text-center text-decoration-none shadow-sm h-100 p-3">
             <div class="empty-state-icon text-primary" aria-hidden="true"><i class="bi bi-file-earmark-text"></i></div>
             <strong><?= t('my_documents') ?></strong>
         </a>
     </div>
     <div class="col-6 col-md-3">
-        <a href="#" class="card text-center text-decoration-none shadow-sm h-100 p-3">
+        <a href="<?= url('public/appointments') ?>" class="card text-center text-decoration-none shadow-sm h-100 p-3">
             <div class="empty-state-icon text-primary" aria-hidden="true"><i class="bi bi-calendar-check"></i></div>
             <strong><?= t('my_appointments') ?></strong>
         </a>
     </div>
     <div class="col-6 col-md-3">
-        <a href="#" class="card text-center text-decoration-none shadow-sm h-100 p-3">
+        <a href="<?= url('public/complaints') ?>" class="card text-center text-decoration-none shadow-sm h-100 p-3">
             <div class="empty-state-icon text-primary" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></div>
             <strong><?= t('my_complaints') ?></strong>
         </a>
     </div>
     <div class="col-6 col-md-3">
-        <a href="#" class="card text-center text-decoration-none shadow-sm h-100 p-3">
+        <a href="<?= url('public/profile') ?>" class="card text-center text-decoration-none shadow-sm h-100 p-3">
             <div class="empty-state-icon text-primary" aria-hidden="true"><i class="bi bi-person"></i></div>
             <strong><?= t('my_profile') ?></strong>
         </a>
