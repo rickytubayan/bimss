@@ -5,7 +5,6 @@ class HomeController extends \Controller {
     public function index() {
         $this->viewPublic('home/index', [
             'title' => 'Barangay Information Management System',
-            'barangayName' => $this->db->query("SELECT name FROM barangays LIMIT 1")->fetch()['name'] ?? 'Barangay',
         ]);
     }
 

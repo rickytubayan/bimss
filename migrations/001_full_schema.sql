@@ -1950,7 +1950,7 @@ INSERT IGNORE INTO cities_municipalities (code, name, province_code, type) VALUE
 ('1380000000', 'Manila', '1380000000', 'city');
 
 INSERT IGNORE INTO barangays (code, name, municipality_code, psgc_10digit) VALUES
-('1380010000', 'Sample Barangay', '1380000000', '1380010000');
+('1380010000', 'Napnapan Norte', '1380000000', '1380010000');
 
 INSERT IGNORE INTO puroks (barangay_id, name, code, type, classification)
 SELECT b.id, p.name, p.code, p.type, p.classification
@@ -1963,7 +1963,7 @@ JOIN (
     SELECT 'Sitio Bonifacio', 'S2', 'sitio', 'urban' UNION ALL
     SELECT 'Zone 5', 'Z5', 'zone', 'urban'
 ) p
-WHERE b.name = 'Sample Barangay'
+WHERE b.name = 'Napnapan Norte'
   AND NOT EXISTS (SELECT 1 FROM puroks pk WHERE pk.name = p.name LIMIT 1);
 
 -- -----------------------------------------------------
@@ -1985,7 +1985,7 @@ JOIN (
     ) x
 ) h
 JOIN puroks p ON p.barangay_id = b.id AND p.name = h.purok_name
-WHERE b.name = 'Sample Barangay'
+WHERE b.name = 'Napnapan Norte'
   AND NOT EXISTS (
       SELECT 1 FROM households hh
       WHERE hh.barangay_id = b.id

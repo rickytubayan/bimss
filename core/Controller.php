@@ -7,6 +7,8 @@ class Controller {
     }
 
     protected function view($viewPath, $data = []) {
+        $config = require CONFIG_PATH . '/app.php';
+        $data['barangayName'] = $data['barangayName'] ?? ($config['barangay']['name'] ?? 'Barangay');
         extract($data);
         $viewFile = VIEWS_PATH . '/' . str_replace('.', '/', $viewPath) . '.php';
 
