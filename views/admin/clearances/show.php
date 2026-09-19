@@ -25,7 +25,14 @@ $statusBadge = match ($clearance['status']) {
             </p>
         </div>
     </div>
-    <a href="<?= admin_url('clearances') ?>" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    <div class="d-flex gap-2 align-items-center">
+        <a href="<?= admin_url('clearances/' . $clearance['id'] . '/edit') ?>" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+        <form method="POST" action="<?= admin_url('clearances/' . $clearance['id'] . '/delete') ?>" class="d-inline" onsubmit="return confirm('Delete this clearance?');">
+            <?= CSRF::field() ?>
+            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete</button>
+        </form>
+        <a href="<?= admin_url('clearances') ?>" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    </div>
 </div>
 
 <div class="row g-3">

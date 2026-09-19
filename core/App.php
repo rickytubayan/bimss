@@ -73,7 +73,12 @@ class App {
             $r->post('households/{id}/delete', 'Admin\HouseholdController@delete');
 
             $r->get('clearances', 'Admin\ClearanceController@index');
+            $r->get('clearances/create', 'Admin\ClearanceController@create');
+            $r->post('clearances/store', 'Admin\ClearanceController@store');
             $r->get('clearances/{id}', 'Admin\ClearanceController@show');
+            $r->get('clearances/{id}/edit', 'Admin\ClearanceController@edit');
+            $r->post('clearances/{id}/update', 'Admin\ClearanceController@update');
+            $r->post('clearances/{id}/delete', 'Admin\ClearanceController@delete');
             $r->post('clearances/process/{id}', 'Admin\ClearanceController@process');
             $r->post('clearances/sign/{id}', 'Admin\ClearanceController@sign');
             $r->post('clearances/release/{id}', 'Admin\ClearanceController@release');

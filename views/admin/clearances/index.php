@@ -3,6 +3,7 @@
         <h1 class="page-title">Clearances</h1>
         <p class="page-subtitle mb-0"><?= number_format($total) ?> record(s)</p>
     </div>
+    <a href="<?= admin_url('clearances/create') ?>" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Add Clearance</a>
 </div>
 
 <div class="d-flex flex-wrap gap-2 mb-3">
@@ -80,6 +81,11 @@
                         <td class="text-end">
                             <div class="table-actions justify-content-end">
                                 <a href="<?= admin_url('clearances/' . $row['id']) ?>" class="btn btn-sm btn-outline-secondary" title="View"><i class="bi bi-eye"></i></a>
+                                <a href="<?= admin_url('clearances/' . $row['id'] . '/edit') ?>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <form method="POST" action="<?= admin_url('clearances/' . $row['id'] . '/delete') ?>" class="d-inline" onsubmit="return confirm('Delete this clearance?');">
+                                    <?= CSRF::field() ?>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
                             </div>
                         </td>
                     </tr>
