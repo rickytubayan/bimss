@@ -17,10 +17,10 @@ return [
     'otp_expiry_minutes' => 10,
     'otp_length' => 6,
     'barangay' => [
-        'name' => '',
-        'code' => '',
-        'municipality' => '',
-        'province' => '',
-        'region' => '',
+        'name' => 'Napnapan Norte',
+        'code' => '640233',
+        'municipality' => 'Tigbauan Iloilo',
+        'province' => 'Iloilo',
+        'region' => 'Region VI',
     ],
 ];
