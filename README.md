@@ -155,6 +155,7 @@ Currently implemented/skeleton:
 |--------|--------|
 | Core framework, Auth, RBAC | ✅ Done |
 | Layouts, CSS (Bootstrap 5), accessibility JS | ✅ Done |
+| Dashboard | ✅ Live overview: resident/household/senior/PWD counts, pending documents, open complaints & blotters, relief stock, monthly revenue, upcoming bookings, recent requests/blotters/distributions, purok distribution, newest residents |
 | Residents | ✅ Full CRUD (search, filter, pagination, soft delete, full-name search) |
 | Households | ✅ Full CRUD (list, add, edit, show, soft delete, search/filter, assign/change head) |
 | Clearances | ✅ Full workflow (create, edit, delete, process → sign → release) |
@@ -307,6 +308,10 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 ### 37. Relief inventory and distributions were read-only
 **Bug:** `/admin/drrm/relief` displayed relief inventory and the last 10 distributions, but there was no way to add stock, correct an item, record a distribution, or fix a mistaken record. Older distributions were not manageable at all.
 **Fix:** Added full management to the relief page. Inventory gets an **Add Item** modal plus per-row **Edit**/**Delete** actions; distributions get a **Record Distribution** modal plus per-row **Edit**/**Delete** actions, and the list now shows every distribution instead of only the latest 10. Stock is kept in sync automatically: recording a distribution deducts from the item, editing reconciles the difference (including moving a distribution to a different item), and deleting restores the quantity. Stock changes run inside transactions with `SELECT ... FOR UPDATE`, and insufficient stock is rejected with a clear message. Inventory status is derived automatically (`expired` past the expiry date, `depleted` at zero, otherwise `available`), and an inventory item with existing distributions cannot be deleted until those records are removed. All deletes are soft deletes.
+
+### 38. Dashboard did not reflect current barangay data
+**Bug:** The admin dashboard only showed six headline numbers, sourced from a few early modules. Newer modules (Senior & PWD, relief inventory/distributions, venue bookings) were invisible, the **Recent Complaints** panel read from an unused `complaints` table and was always empty, and several queries (`recentResidents`, monthly revenue, purok distribution) were loaded but never rendered. Revenue and household/resident counts also ignored soft-deleted records in some places.
+**Fix:** Rebuilt `/admin/dashboard` around live data. The stat row now shows active residents, households, Senior & PWD profiles, pending document requests, open blotters, open complaints, available relief units, revenue this month (with all-time total), and upcoming venue bookings — each card links to its module (complaint counts link to the annual report). Added recent document requests (with resident names), recent blotters, recent relief distributions, a relief inventory snapshot, a 12-month revenue bar chart, residents-by-purok distribution, and the newest registered residents. All queries now exclude soft-deleted records, and the page header shows the current generation date/time.
 
 ---
 
