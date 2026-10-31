@@ -3,7 +3,6 @@
         <h1 class="page-title">Venue Bookings</h1>
         <p class="page-subtitle mb-0"><?= number_format(count($bookings)) ?> booking<?= count($bookings) === 1 ? '' : 's' ?></p>
     </div>
-    <a href="#newBooking" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>New Booking</a>
 </div>
 
 <div class="stats-grid">
