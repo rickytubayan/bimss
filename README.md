@@ -374,4 +374,4 @@ A core requirement — the system is built for users of all ages and abilities:
 
 ---
 
-*BIMS v1.1.1 — built with ❤️ for Philippine barangays.*
+*BIMS v1.2.2 — built with ❤️ for Philippine barangays.*
