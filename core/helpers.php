@@ -22,7 +22,10 @@ function admin_url($path = '') {
 }
 
 function asset($path) {
-    return url('public/' . ltrim($path, '/'));
+    $path = ltrim($path, '/');
+    $file = PUBLIC_PATH . '/' . $path;
+    $version = is_file($file) ? filemtime($file) : false;
+    return url('public/' . $path) . ($version ? '?v=' . $version : '');
 }
 
 function old($key, $default = '') {

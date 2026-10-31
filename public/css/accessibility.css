@@ -85,9 +85,12 @@
     border-color: #3c4043;
 }
 
-[data-theme="dark"] .admin-content,
 [data-theme="dark"] .accessibility-bar {
     background: #202124;
+}
+
+[data-theme="dark"] .admin-content {
+    background: transparent;
 }
 
 [data-theme="dark"] .btn-outline {
