@@ -133,6 +133,8 @@ class App {
 
             $r->get('seniors', 'Admin\SeniorPWDController@index');
             $r->post('seniors/store', 'Admin\SeniorPWDController@store');
+            $r->post('seniors/{id}/update', 'Admin\SeniorPWDController@update');
+            $r->post('seniors/{id}/delete', 'Admin\SeniorPWDController@delete');
 
             $r->get('blotter', 'Admin\BlotterController@index');
             $r->post('blotter/store', 'Admin\BlotterController@store');

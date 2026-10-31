@@ -40,20 +40,15 @@ class SeniorPWDController extends \Controller {
             'rows' => $rows,
             'stats' => $stats,
             'type' => $type,
-            'residents' => $this->residentOptions(),
+            'residents' => $this->residentOptions(true),
+            'allResidents' => $this->residentOptions(false),
         ]);
     }
 
     public function store() {
         $input = $this->getInput();
 
-        $errors = [];
-        if (empty($input['resident_id'] ?? '')) $errors[] = 'Resident is required.';
-        if (!in_array($input['type'] ?? '', ['senior', 'pwd'])) $errors[] = 'Please select a valid type.';
-        if (!in_array($input['pension_status'] ?? '', ['active', 'inactive', 'pending'])) $errors[] = 'Please select a valid pension status.';
-        if (($input['monthly_allowance'] ?? '') !== '' && (float)$input['monthly_allowance'] < 0) $errors[] = 'Monthly allowance cannot be negative.';
-        if (($input['grocery_benefits'] ?? '') !== '' && (float)$input['grocery_benefits'] < 0) $errors[] = 'Grocery benefits cannot be negative.';
-
+        $errors = $this->validateProfile($input);
         if (!empty($errors)) {
             set_old_input($input);
             flash('error', implode(' ', $errors));
@@ -66,38 +61,113 @@ class SeniorPWDController extends \Controller {
                     (resident_id, type, id_type, id_number, pension_status, monthly_allowance, grocery_benefits, osca_number, pwd_number)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->execute([
-                (int)$input['resident_id'],
-                $input['type'],
-                ($input['id_type'] ?? '') === '' ? null : trim($input['id_type']),
-                ($input['id_number'] ?? '') === '' ? null : trim($input['id_number']),
-                $input['pension_status'],
-                (float)($input['monthly_allowance'] ?? 0),
-                (float)($input['grocery_benefits'] ?? 0),
-                ($input['osca_number'] ?? '') === '' ? null : trim($input['osca_number']),
-                ($input['pwd_number'] ?? '') === '' ? null : trim($input['pwd_number']),
-            ]);
+            $stmt->execute($this->profileData($input));
 
             flash('success', ucfirst($input['type']) . ' profile saved successfully.');
-            redirect(admin_url('seniors'));
         } catch (\PDOException $e) {
-            if ($e->getCode() === '23000') {
-                set_old_input($input);
-                flash('error', 'This resident already has a ' . $input['type'] . ' profile.');
-            } else {
-                set_old_input($input);
-                flash('error', 'Could not save the profile. Please try again.');
-            }
+            $this->handleSaveError($e, $input);
+        }
+
+        redirect(admin_url('seniors'));
+    }
+
+    public function update($id) {
+        $profile = $this->findProfile($id);
+        $input = $this->getInput();
+
+        $errors = $this->validateProfile($input);
+        if (!empty($errors)) {
+            set_old_input($input);
+            flash('error', implode(' ', $errors));
             redirect(admin_url('seniors'));
+        }
+
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE senior_pwd_profiles
+                SET resident_id = ?, type = ?, id_type = ?, id_number = ?, pension_status = ?,
+                    monthly_allowance = ?, grocery_benefits = ?, osca_number = ?, pwd_number = ?, updated_at = ?
+                WHERE id = ? AND deleted_at IS NULL
+            ");
+            $stmt->execute(array_merge($this->profileData($input), [date('Y-m-d H:i:s'), (int)$profile['id']]));
+
+            flash('success', ucfirst($input['type']) . ' profile updated successfully.');
+        } catch (\PDOException $e) {
+            $this->handleSaveError($e, $input);
+        }
+
+        redirect(admin_url('seniors'));
+    }
+
+    public function delete($id) {
+        $this->findProfile($id);
+
+        $stmt = $this->db->prepare("
+            UPDATE senior_pwd_profiles
+            SET deleted_at = ?, updated_at = ?
+            WHERE id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), (int)$id]);
+
+        flash('success', 'Profile deleted successfully.');
+        redirect(admin_url('seniors'));
+    }
+
+    private function validateProfile(array $input) {
+        $errors = [];
+        if (empty($input['resident_id'] ?? '')) $errors[] = 'Resident is required.';
+        if (!in_array($input['type'] ?? '', ['senior', 'pwd'])) $errors[] = 'Please select a valid type.';
+        if (!in_array($input['pension_status'] ?? '', ['active', 'inactive', 'pending'])) $errors[] = 'Please select a valid pension status.';
+        if (($input['monthly_allowance'] ?? '') !== '' && (float)$input['monthly_allowance'] < 0) $errors[] = 'Monthly allowance cannot be negative.';
+        if (($input['grocery_benefits'] ?? '') !== '' && (float)$input['grocery_benefits'] < 0) $errors[] = 'Grocery benefits cannot be negative.';
+        return $errors;
+    }
+
+    private function profileData(array $input) {
+        return [
+            (int)$input['resident_id'],
+            $input['type'],
+            ($input['id_type'] ?? '') === '' ? null : trim($input['id_type']),
+            ($input['id_number'] ?? '') === '' ? null : trim($input['id_number']),
+            $input['pension_status'],
+            (float)($input['monthly_allowance'] ?? 0),
+            (float)($input['grocery_benefits'] ?? 0),
+            ($input['osca_number'] ?? '') === '' ? null : trim($input['osca_number']),
+            ($input['pwd_number'] ?? '') === '' ? null : trim($input['pwd_number']),
+        ];
+    }
+
+    private function findProfile($id) {
+        $stmt = $this->db->prepare("SELECT * FROM senior_pwd_profiles WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([(int)$id]);
+        $profile = $stmt->fetch();
+
+        if (!$profile) {
+            flash('error', 'Profile not found.');
+            redirect(admin_url('seniors'));
+        }
+
+        return $profile;
+    }
+
+    private function handleSaveError(\PDOException $e, array $input) {
+        set_old_input($input);
+        if ($e->getCode() === '23000') {
+            flash('error', 'This resident already has a ' . $input['type'] . ' profile.');
+        } else {
+            flash('error', 'Could not save the profile. Please try again.');
         }
     }
 
-    private function residentOptions() {
-        return $this->db->query("
-            SELECT id, CONCAT(last_name, ', ', first_name) AS label
-            FROM residents
-            WHERE deleted_at IS NULL AND status = 'active'
-            ORDER BY last_name, first_name
-        ")->fetchAll();
+    private function residentOptions($activeOnly = true) {
+        $sql = "SELECT id, CONCAT(last_name, ', ', first_name) AS label, status
+                FROM residents
+                WHERE deleted_at IS NULL";
+        if ($activeOnly) {
+            $sql .= " AND status = 'active'";
+        }
+        $sql .= " ORDER BY last_name, first_name";
+
+        return $this->db->query($sql)->fetchAll();
     }
 }

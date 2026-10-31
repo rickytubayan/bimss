@@ -165,7 +165,7 @@ Currently implemented/skeleton:
 | Budget | ✅ Create budget + line items, overview list, detail with utilization/balance |
 | Tax | ✅ Tax ledger with assessments, status tracking (unpaid/partial/paid/delinquent), payment recording |
 | Health | ✅ Maternal care, immunization, child growth, disease surveillance, program overview |
-| Senior & PWD | ✅ Registry with senior/PWD profiles, pension tracking, benefits, filter views |
+| Senior & PWD | ✅ Registry with senior/PWD profiles, pension tracking, benefits, edit/delete, filter views |
 | Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update, witness add/edit/delete |
 | Lupon | ✅ KP case workflow: mediation/pangkat/conciliation, hearings, settlements, CFA issuance |
 | Tanod & CCTV | ✅ Tanod roster, duty schedules (JSON member assignments), CCTV camera registry |
@@ -299,6 +299,10 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 ### 35. Blotter witnesses could not be managed
 **Bug:** A blotter entry's detail page listed witnesses but there was no way to add, edit, or delete them, so a report could not be completed or corrected after filing.
 **Fix:** Added full witness management on `/admin/blotter/{id}`: an **Add Witness** modal and per-witness **Edit**/**Delete** actions (Bootstrap modals) backed by new `storeWitness`, `updateWitness`, and `deleteWitness` controller actions. Witnesses are validated (name required) and scoped to their parent blotter, so a witness from another entry cannot be modified by changing the URL. Deletes are soft deletes. The witnesses card now warns prominently when an entry has none, since a blotter report should always carry at least one witness.
+
+### 36. Senior & PWD profiles could not be edited or deleted
+**Bug:** The **Registered Profiles** table on `/admin/seniors` was read-only — a mis-entered pension status, allowance, ID number, or resident could not be corrected, and duplicate/stale profiles could not be removed.
+**Fix:** Added **Edit** and **Delete** actions per profile. Edit opens a pre-filled modal (resident, type, pension status, monthly allowance, grocery benefits, ID type/number, OSCA/PWD numbers) and updates the profile through a new `update()` action; the resident list for editing includes inactive residents (labeled) so existing profiles remain editable. Delete soft-deletes the profile. Both actions validate input and reuse the same duplicate-guard as registration, so changing a resident/type to one that already has that profile shows a clear "already has a profile" message instead of a 500.
 
 ---
 
