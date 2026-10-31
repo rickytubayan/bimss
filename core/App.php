@@ -70,6 +70,7 @@ class App {
             $r->get('households/{id}', 'Admin\HouseholdController@show');
             $r->get('households/{id}/edit', 'Admin\HouseholdController@edit');
             $r->post('households/{id}/update', 'Admin\HouseholdController@update');
+            $r->post('households/{id}/head', 'Admin\HouseholdController@updateHead');
             $r->post('households/{id}/delete', 'Admin\HouseholdController@delete');
 
             $r->get('clearances', 'Admin\ClearanceController@index');

@@ -142,7 +142,8 @@ class ResidentController extends \Controller {
 
     public function update($id) {
         $resident = new Resident();
-        if (!$resident->find($id)) {
+        $existing = $resident->find($id);
+        if (!$existing) {
             flash('error', 'Resident not found.');
             redirect(admin_url('residents'));
         }
@@ -162,6 +163,11 @@ class ResidentController extends \Controller {
 
         $resident->update($id, $data);
 
+        if (array_key_exists('household_id', $data)
+            && (int)$existing['household_id'] !== (int)$data['household_id']) {
+            (new Household())->clearHeadByResident($id);
+        }
+
         flash('success', 'Resident updated successfully.');
         redirect(admin_url('residents/' . $id));
     }
@@ -173,6 +179,7 @@ class ResidentController extends \Controller {
             redirect(admin_url('residents'));
         }
         $resident->delete($id);
+        (new Household())->clearHeadByResident($id);
         flash('success', 'Resident deleted successfully.');
         redirect(admin_url('residents'));
     }

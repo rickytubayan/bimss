@@ -79,7 +79,7 @@ $stBadge = match ($household['status']) {
                                     <a href="<?= admin_url('residents/' . $m['id']) ?>" class="text-decoration-none fw-semibold">
                                         <?= e($name) ?>
                                     </a>
-                                    <?php if ($head && $head['id'] === $m['id']): ?>
+                                    <?php if ($head && (int)$head['id'] === (int)$m['id']): ?>
                                         <span class="badge rounded-pill badge-blue ms-1" title="Household Head">Head</span>
                                     <?php endif; ?>
                                 </td>
@@ -117,6 +117,36 @@ $stBadge = match ($household['status']) {
                     <span class="text-muted small"><?= e($head['phone'] ?? 'No phone') ?></span>
                 <?php else: ?>
                     <span class="text-muted">No head assigned.</span>
+                <?php endif; ?>
+
+                <?php if (!empty($members)): ?>
+                    <?php
+                    $headId = $head ? (int)$head['id'] : 0;
+                    $memberCount = count($members);
+                    ?>
+                    <hr class="my-3">
+                    <form method="POST" action="<?= admin_url('households/' . $household['id'] . '/head') ?>">
+                        <?= CSRF::field() ?>
+                        <label class="form-label small text-muted" for="head_resident_id">
+                            Change household head
+                            <span class="d-block fw-normal">Choose from the <?= $memberCount ?> member<?= $memberCount === 1 ? '' : 's' ?> assigned to this household.</span>
+                        </label>
+                        <select name="head_resident_id" id="head_resident_id" class="form-select form-select-sm mb-2">
+                            <option value="">— No head —</option>
+                            <?php foreach ($members as $m): ?>
+                                <?php
+                                $mName = trim(($m['first_name'] ?? '') . ' ' . ($m['middle_name'] ?? '') . ' ' . $m['last_name'] . ($m['suffix'] ? ' ' . $m['suffix'] : ''));
+                                $mLabel = $mName . ($m['status'] !== 'active' ? ' (' . ucwords(str_replace('_', ' ', $m['status'])) . ')' : '');
+                                ?>
+                                <option value="<?= (int)$m['id'] ?>" <?= $headId === (int)$m['id'] ? 'selected' : '' ?>><?= e($mLabel) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-check-lg me-1"></i>Update Head</button>
+                    </form>
+                <?php else: ?>
+                    <div class="alert alert-light border small mt-3 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>Add residents to this household before assigning a head.
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

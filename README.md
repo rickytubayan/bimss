@@ -156,7 +156,7 @@ Currently implemented/skeleton:
 | Core framework, Auth, RBAC | ✅ Done |
 | Layouts, CSS (Bootstrap 5), accessibility JS | ✅ Done |
 | Residents | ✅ Full CRUD (search, filter, pagination, soft delete, full-name search) |
-| Households | ✅ Full CRUD (list, add, edit, show, soft delete, search/filter) |
+| Households | ✅ Full CRUD (list, add, edit, show, soft delete, search/filter, assign/change head) |
 | Clearances | ✅ Full workflow (create, edit, delete, process → sign → release) |
 | Certificates | ✅ Full CRUD (create, view, edit, delete, sign/release) |
 | Appointments | ✅ Full workflow (book, list, show, complete, cancel, delete) + slot management |
@@ -291,6 +291,10 @@ Both `/admin/certificates` and `/admin/clearances` only offered read + workflow 
 
 ### 33. Sample data consolidated into a single migration & table count corrected
 All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql`) was merged into `migrations/001_full_schema.sql` as an idempotent, re-runnable seed section and the `seeds/` folder removed, so the whole database is built with one command (`mysql -u root < migrations/001_full_schema.sql`). The rebuild also surfaced that two tables (`document_renewals`, `transparency_documents`) were missing from the migration's drop/recreate list — added, and the header's "86 tables" corrected to the actual **84**. The barangay name is now sourced from the settings (`config/app.php` → `barangay.name`, "Napnapan Norte") everywhere the portal and admin layouts render a title, including the login page, instead of the old "Sample Barangay" / hardcoded fallback.
+
+### 34. Household head could not be assigned or updated
+**Bug:** The household detail page only *displayed* a head and offered no way to set one. `Household::getHead()` also looked up `resident_links` using the household ID as a resident ID and only `parent` relationships, so it almost never resolved a real head.
+**Fix:** Added a nullable `households.head_resident_id` column (indexed, FK to `residents` with `ON DELETE SET NULL`) and replaced `getHead()` with a lookup by that column that also verifies the resident still belongs to the household. The detail page now has a **Household Head** card with a dropdown listing the members assigned to that household and an **Update Head** action; the controller rejects residents who are not members of the same household and supports clearing the head. Moving a resident to another household or deleting them clears the head reference so no stale head remains. The full schema migration includes the new column/constraint for fresh imports.
 
 ---
 

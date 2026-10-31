@@ -227,6 +227,7 @@ CREATE TABLE `households` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `barangay_id` INT UNSIGNED NOT NULL,
   `purok_id` INT UNSIGNED NULL,
+  `head_resident_id` INT UNSIGNED NULL,
   `house_number` VARCHAR(20) NULL,
   `street` VARCHAR(200) NULL,
   `gps_latitude` DECIMAL(8,4) NULL,
@@ -239,6 +240,7 @@ CREATE TABLE `households` (
   PRIMARY KEY (`id`),
   INDEX `idx_households_barangay_id` (`barangay_id`),
   INDEX `idx_households_purok_id` (`purok_id`),
+  INDEX `idx_households_head_resident_id` (`head_resident_id`),
   INDEX `idx_households_status` (`status`),
   CONSTRAINT `fk_households_barangay` FOREIGN KEY (`barangay_id`) REFERENCES `barangays` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_households_purok` FOREIGN KEY (`purok_id`) REFERENCES `puroks` (`id`) ON DELETE SET NULL
@@ -288,6 +290,10 @@ CREATE TABLE `residents` (
   CONSTRAINT `fk_residents_household` FOREIGN KEY (`household_id`) REFERENCES `households` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_residents_purok` FOREIGN KEY (`purok_id`) REFERENCES `puroks` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Household head links to a resident (added after residents exist).
+ALTER TABLE `households`
+  ADD CONSTRAINT `fk_households_head_resident` FOREIGN KEY (`head_resident_id`) REFERENCES `residents` (`id`) ON DELETE SET NULL;
 
 CREATE TABLE `purok_officers` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,

@@ -171,6 +171,33 @@ class HouseholdController extends \Controller {
         redirect(admin_url('households/' . $id));
     }
 
+    public function updateHead($id) {
+        $household = new Household();
+        if (!$household->find($id)) {
+            flash('error', 'Household not found.');
+            redirect(admin_url('households'));
+        }
+
+        $input = $this->getInput();
+        $residentId = trim((string)($input['head_resident_id'] ?? ''));
+
+        if ($residentId === '') {
+            $household->setHead($id, null);
+            flash('success', 'Household head cleared.');
+            redirect(admin_url('households/' . $id));
+        }
+
+        $member = $household->getMember($id, (int)$residentId);
+        if (!$member) {
+            flash('error', 'Selected resident is not a member of this household.');
+            redirect(admin_url('households/' . $id));
+        }
+
+        $household->setHead($id, (int)$residentId);
+        flash('success', 'Household head updated successfully.');
+        redirect(admin_url('households/' . $id));
+    }
+
     public function delete($id) {
         $household = new Household();
         if (!$household->find($id)) {
