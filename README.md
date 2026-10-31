@@ -155,7 +155,7 @@ Currently implemented/skeleton:
 |--------|--------|
 | Core framework, Auth, RBAC | ✅ Done |
 | Layouts, CSS (Bootstrap 5), accessibility JS | ✅ Done |
-| Dashboard | ✅ Live overview: resident/household/senior/PWD counts, pending documents, open complaints & blotters, relief stock, monthly revenue, upcoming bookings, recent requests/blotters/distributions, purok distribution, newest residents |
+| Dashboard | ✅ Focused live overview of Overview, Services, Finance, and Health & Welfare: residents/households, pending documents, appointments today, monthly revenue/expenses, Senior & PWD and health counts, recent document requests, health snapshot, revenue-vs-expenses chart, recent health programs |
 | Residents | ✅ Full CRUD (search, filter, pagination, soft delete, full-name search) |
 | Households | ✅ Full CRUD (list, add, edit, show, soft delete, search/filter, assign/change head) |
 | Clearances | ✅ Full workflow (create, edit, delete, process → sign → release) |
@@ -312,6 +312,10 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 ### 38. Dashboard did not reflect current barangay data
 **Bug:** The admin dashboard only showed six headline numbers, sourced from a few early modules. Newer modules (Senior & PWD, relief inventory/distributions, venue bookings) were invisible, the **Recent Complaints** panel read from an unused `complaints` table and was always empty, and several queries (`recentResidents`, monthly revenue, purok distribution) were loaded but never rendered. Revenue and household/resident counts also ignored soft-deleted records in some places.
 **Fix:** Rebuilt `/admin/dashboard` around live data. The stat row now shows active residents, households, Senior & PWD profiles, pending document requests, open blotters, open complaints, available relief units, revenue this month (with all-time total), and upcoming venue bookings — each card links to its module (complaint counts link to the annual report). Added recent document requests (with resident names), recent blotters, recent relief distributions, a relief inventory snapshot, a 12-month revenue bar chart, residents-by-purok distribution, and the newest registered residents. All queries now exclude soft-deleted records, and the page header shows the current generation date/time.
+
+### 39. Dashboard showed data from too many modules
+**Bug:** The dashboard had grown crowded with panels from every module (blotters, relief, bookings, purok distribution, newest residents), making the overview noisy and hard to scan.
+**Fix:** Narrowed `/admin/dashboard` to the four requested areas — **Overview**, **Services**, **Finance**, and **Health & Welfare**. The stat row now shows active residents, households, pending document requests, appointments today, revenue this month, expenses this month, Senior & PWD profiles, and pregnant women. Detail panels were reduced to recent document requests, a health & welfare snapshot, a revenue-vs-expenses chart for the current year, and recent health programs. All blotter, complaint, relief, booking, purok, and newest-resident panels were removed.
 
 ---
 
