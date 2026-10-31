@@ -166,6 +166,12 @@ class App {
             $r->post('drrm/rdana/store', 'Admin\DRRMController@storeRDANA');
             $r->get('drrm/hazard-map', 'Admin\DRRMController@hazardMap');
             $r->get('drrm/relief', 'Admin\DRRMController@relief');
+            $r->post('drrm/relief/inventory/store', 'Admin\DRRMController@storeInventory');
+            $r->post('drrm/relief/inventory/{id}/update', 'Admin\DRRMController@updateInventory');
+            $r->post('drrm/relief/inventory/{id}/delete', 'Admin\DRRMController@deleteInventory');
+            $r->post('drrm/relief/distributions/store', 'Admin\DRRMController@storeDistribution');
+            $r->post('drrm/relief/distributions/{id}/update', 'Admin\DRRMController@updateDistribution');
+            $r->post('drrm/relief/distributions/{id}/delete', 'Admin\DRRMController@deleteDistribution');
 
             $r->get('evacuation', 'Admin\EvacuationController@index');
             $r->post('evacuation/store', 'Admin\EvacuationController@store');

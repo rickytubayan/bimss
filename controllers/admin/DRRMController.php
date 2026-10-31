@@ -5,6 +5,8 @@ class DRRMController extends \Controller {
 
     private const EVENT_TYPES = ['flood', 'typhoon', 'earthquake', 'fire', 'landslide', 'volcanic', 'drought', 'other'];
     private const SEVERITIES = ['minor', 'moderate', 'severe', 'catastrophic'];
+    private const RELIEF_CATEGORIES = ['food', 'water', 'medicine', 'blanket', 'hygiene', 'other'];
+    private const RELIEF_STATUSES = ['available', 'depleted', 'expired'];
 
     public function index() {
         $db = $this->db;
@@ -243,13 +245,13 @@ class DRRMController extends \Controller {
         ")->fetchAll();
 
         $distributions = $db->query("
-            SELECT d.*, i.item_name, CONCAT(r.last_name, ', ', r.first_name) AS resident_name, e.name AS event_name
+            SELECT d.*, i.item_name, i.unit, CONCAT(r.last_name, ', ', r.first_name) AS resident_name, e.name AS event_name
             FROM relief_distributions d
             JOIN relief_inventory i ON i.id = d.inventory_id
             JOIN residents r ON r.id = d.resident_id
             JOIN disaster_events e ON e.id = d.disaster_event_id
             WHERE d.deleted_at IS NULL
-            ORDER BY d.distributed_at DESC, d.id DESC LIMIT 10
+            ORDER BY d.distributed_at DESC, d.id DESC
         ")->fetchAll();
 
         $stats = [
@@ -264,6 +266,7 @@ class DRRMController extends \Controller {
             SELECT id, CONCAT(last_name, ', ', first_name) AS label
             FROM residents WHERE deleted_at IS NULL AND status = 'active' ORDER BY last_name, first_name
         ")->fetchAll();
+        $currentUser = $this->getUser();
 
         $this->viewAdmin('drrm/relief', [
             'title' => 'DRRM - Relief',
@@ -272,6 +275,446 @@ class DRRMController extends \Controller {
             'stats' => $stats,
             'events' => $events,
             'residents' => $residents,
+            'categories' => self::RELIEF_CATEGORIES,
+            'currentUserName' => trim((string)($currentUser['first_name'] ?? '')),
         ]);
+    }
+
+    public function storeInventory() {
+        $input = $this->getInput();
+
+        $errors = $this->validateInventory($input);
+        if (!empty($errors)) {
+            set_old_input($input);
+            flash('error', implode(' ', $errors));
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $data = $this->inventoryData($input);
+        $data['status'] = $this->inventoryStatus($data['quantity'], $data['expiry_date']);
+
+        $stmt = $this->db->prepare("
+            INSERT INTO relief_inventory (item_name, category, quantity, unit, expiry_date, storage_location, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $data['item_name'],
+            $data['category'],
+            $data['quantity'],
+            $data['unit'],
+            $data['expiry_date'],
+            $data['storage_location'],
+            $data['status'],
+        ]);
+
+        flash('success', 'Inventory item added.');
+        redirect(admin_url('drrm/relief'));
+    }
+
+    public function updateInventory($id) {
+        $item = $this->findInventoryItem($id);
+        if (!$item) {
+            flash('error', 'Inventory item not found.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $input = $this->getInput();
+        $errors = $this->validateInventory($input);
+        if (!empty($errors)) {
+            set_old_input($input);
+            flash('error', implode(' ', $errors));
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $data = $this->inventoryData($input);
+        $data['status'] = $this->inventoryStatus($data['quantity'], $data['expiry_date']);
+
+        $stmt = $this->db->prepare("
+            UPDATE relief_inventory
+            SET item_name = ?, category = ?, quantity = ?, unit = ?, expiry_date = ?, storage_location = ?, status = ?, updated_at = ?
+            WHERE id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([
+            $data['item_name'],
+            $data['category'],
+            $data['quantity'],
+            $data['unit'],
+            $data['expiry_date'],
+            $data['storage_location'],
+            $data['status'],
+            date('Y-m-d H:i:s'),
+            (int)$item['id'],
+        ]);
+
+        flash('success', 'Inventory item updated.');
+        redirect(admin_url('drrm/relief'));
+    }
+
+    public function deleteInventory($id) {
+        $item = $this->findInventoryItem($id);
+        if (!$item) {
+            flash('error', 'Inventory item not found.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) c FROM relief_distributions
+            WHERE inventory_id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([(int)$item['id']]);
+
+        if ((int)$stmt->fetch()['c'] > 0) {
+            flash('error', 'This item has existing distributions. Delete those records first.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $stmt = $this->db->prepare("
+            UPDATE relief_inventory
+            SET deleted_at = ?, updated_at = ?
+            WHERE id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), (int)$item['id']]);
+
+        flash('success', 'Inventory item deleted.');
+        redirect(admin_url('drrm/relief'));
+    }
+
+    public function storeDistribution() {
+        $input = $this->getInput();
+
+        $errors = $this->validateDistribution($input);
+        if (!empty($errors)) {
+            set_old_input($input);
+            flash('error', implode(' ', $errors));
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $data = $this->distributionData($input);
+        $db = $this->db;
+        $db->beginTransaction();
+
+        try {
+            $item = $this->findInventoryItem($data['inventory_id'], true);
+            if (!$item) {
+                throw new \RuntimeException('The selected item is no longer available.');
+            }
+            if ((int)$item['quantity'] < $data['quantity']) {
+                throw new \RuntimeException('Only ' . (int)$item['quantity'] . ' ' . ($item['unit'] ?: 'unit') . '(s) of ' . $item['item_name'] . ' are in stock.');
+            }
+
+            $stmt = $db->prepare("
+                INSERT INTO relief_distributions
+                    (inventory_id, resident_id, disaster_event_id, quantity, distributed_at, distributed_by, or_number)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $data['inventory_id'],
+                $data['resident_id'],
+                $data['disaster_event_id'],
+                $data['quantity'],
+                $data['distributed_at'],
+                $data['distributed_by'],
+                $data['or_number'],
+            ]);
+
+            $this->adjustInventoryStock($item, -$data['quantity']);
+
+            $db->commit();
+        } catch (\RuntimeException $e) {
+            $db->rollBack();
+            flash('error', $e->getMessage());
+            redirect(admin_url('drrm/relief'));
+        } catch (\Exception $e) {
+            $db->rollBack();
+            flash('error', 'Could not record the distribution. Please try again.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        flash('success', 'Distribution recorded.');
+        redirect(admin_url('drrm/relief'));
+    }
+
+    public function updateDistribution($id) {
+        $distribution = $this->findDistribution($id);
+        if (!$distribution) {
+            flash('error', 'Distribution record not found.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $input = $this->getInput();
+        $errors = $this->validateDistribution($input);
+        if (!empty($errors)) {
+            set_old_input($input);
+            flash('error', implode(' ', $errors));
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $data = $this->distributionData($input);
+        $oldInventoryId = (int)$distribution['inventory_id'];
+        $newInventoryId = (int)$data['inventory_id'];
+        $oldQuantity = (int)$distribution['quantity'];
+        $newQuantity = (int)$data['quantity'];
+
+        $db = $this->db;
+        $db->beginTransaction();
+
+        try {
+            $lockIds = array_values(array_unique([$oldInventoryId, $newInventoryId]));
+            sort($lockIds);
+
+            $locked = [];
+            foreach ($lockIds as $lockId) {
+                $locked[$lockId] = $this->findInventoryItem($lockId, true);
+            }
+
+            $oldItem = $locked[$oldInventoryId] ?? null;
+            if (!$oldItem) {
+                throw new \RuntimeException('The original inventory item is no longer available.');
+            }
+
+            if ($oldInventoryId === $newInventoryId) {
+                if ((int)$oldItem['quantity'] + $oldQuantity < $newQuantity) {
+                    throw new \RuntimeException('Only ' . ((int)$oldItem['quantity'] + $oldQuantity) . ' ' . ($oldItem['unit'] ?: 'unit') . '(s) of ' . $oldItem['item_name'] . ' are available.');
+                }
+            } else {
+                $newItem = $locked[$newInventoryId] ?? null;
+                if (!$newItem) {
+                    throw new \RuntimeException('The selected item is no longer available.');
+                }
+                if ((int)$newItem['quantity'] < $newQuantity) {
+                    throw new \RuntimeException('Only ' . (int)$newItem['quantity'] . ' ' . ($newItem['unit'] ?: 'unit') . '(s) of ' . $newItem['item_name'] . ' are in stock.');
+                }
+            }
+
+            $stmt = $db->prepare("
+                UPDATE relief_distributions
+                SET inventory_id = ?, resident_id = ?, disaster_event_id = ?, quantity = ?,
+                    distributed_at = ?, distributed_by = ?, or_number = ?, updated_at = ?
+                WHERE id = ? AND deleted_at IS NULL
+            ");
+            $stmt->execute([
+                $data['inventory_id'],
+                $data['resident_id'],
+                $data['disaster_event_id'],
+                $data['quantity'],
+                $data['distributed_at'],
+                $data['distributed_by'],
+                $data['or_number'],
+                date('Y-m-d H:i:s'),
+                (int)$distribution['id'],
+            ]);
+
+            if ($oldInventoryId === $newInventoryId) {
+                $this->adjustInventoryStock($oldItem, $oldQuantity - $newQuantity);
+            } else {
+                $this->adjustInventoryStock($oldItem, $oldQuantity);
+                $this->adjustInventoryStock($locked[$newInventoryId], -$newQuantity);
+            }
+
+            $db->commit();
+        } catch (\RuntimeException $e) {
+            $db->rollBack();
+            flash('error', $e->getMessage());
+            redirect(admin_url('drrm/relief'));
+        } catch (\Exception $e) {
+            $db->rollBack();
+            flash('error', 'Could not update the distribution. Please try again.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        flash('success', 'Distribution updated.');
+        redirect(admin_url('drrm/relief'));
+    }
+
+    public function deleteDistribution($id) {
+        $distribution = $this->findDistribution($id);
+        if (!$distribution) {
+            flash('error', 'Distribution record not found.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        $db = $this->db;
+        $db->beginTransaction();
+
+        try {
+            $item = $this->findInventoryItem((int)$distribution['inventory_id'], true);
+            if ($item) {
+                $this->adjustInventoryStock($item, (int)$distribution['quantity']);
+            }
+
+            $stmt = $db->prepare("
+                UPDATE relief_distributions
+                SET deleted_at = ?, updated_at = ?
+                WHERE id = ? AND deleted_at IS NULL
+            ");
+            $stmt->execute([date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), (int)$distribution['id']]);
+
+            $db->commit();
+        } catch (\Exception $e) {
+            $db->rollBack();
+            flash('error', 'Could not delete the distribution. Please try again.');
+            redirect(admin_url('drrm/relief'));
+        }
+
+        flash('success', 'Distribution deleted and stock restored.');
+        redirect(admin_url('drrm/relief'));
+    }
+
+    private function validateInventory(array $input) {
+        $errors = [];
+
+        $name = trim((string)($input['item_name'] ?? ''));
+        if ($name === '') {
+            $errors[] = 'Item name is required.';
+        } elseif (mb_strlen($name) > 150) {
+            $errors[] = 'Item name must be 150 characters or fewer.';
+        }
+
+        if (!in_array($input['category'] ?? '', self::RELIEF_CATEGORIES, true)) {
+            $errors[] = 'Please select a valid category.';
+        }
+
+        $quantity = trim((string)($input['quantity'] ?? ''));
+        if ($quantity === '' || !ctype_digit($quantity)) {
+            $errors[] = 'Quantity must be a whole number of 0 or more.';
+        }
+
+        if (mb_strlen(trim((string)($input['unit'] ?? ''))) > 30) {
+            $errors[] = 'Unit must be 30 characters or fewer.';
+        }
+
+        $expiry = trim((string)($input['expiry_date'] ?? ''));
+        if ($expiry !== '' && !$this->isValidDate($expiry)) {
+            $errors[] = 'Expiry date is not a valid date.';
+        }
+
+        if (mb_strlen(trim((string)($input['storage_location'] ?? ''))) > 200) {
+            $errors[] = 'Storage location must be 200 characters or fewer.';
+        }
+
+        return $errors;
+    }
+
+    private function inventoryData(array $input) {
+        return [
+            'item_name' => trim((string)$input['item_name']),
+            'category' => (string)$input['category'],
+            'quantity' => (int)$input['quantity'],
+            'unit' => trim((string)($input['unit'] ?? '')) === '' ? null : trim((string)$input['unit']),
+            'expiry_date' => trim((string)($input['expiry_date'] ?? '')) === '' ? null : trim((string)$input['expiry_date']),
+            'storage_location' => trim((string)($input['storage_location'] ?? '')) === '' ? null : trim((string)$input['storage_location']),
+        ];
+    }
+
+    private function inventoryStatus($quantity, $expiryDate) {
+        if ($expiryDate !== null && $expiryDate !== '' && $expiryDate < date('Y-m-d')) {
+            return 'expired';
+        }
+
+        return (int)$quantity <= 0 ? 'depleted' : 'available';
+    }
+
+    private function validateDistribution(array $input) {
+        $errors = [];
+
+        $inventoryId = trim((string)($input['inventory_id'] ?? ''));
+        if ($inventoryId === '' || !ctype_digit($inventoryId) || !$this->findInventoryItem((int)$inventoryId)) {
+            $errors[] = 'Please select a valid inventory item.';
+        }
+
+        $residentId = trim((string)($input['resident_id'] ?? ''));
+        if ($residentId === '' || !ctype_digit($residentId) || !$this->recordExists('residents', (int)$residentId)) {
+            $errors[] = 'Please select a valid resident.';
+        }
+
+        $eventId = trim((string)($input['disaster_event_id'] ?? ''));
+        if ($eventId === '' || !ctype_digit($eventId) || !$this->recordExists('disaster_events', (int)$eventId)) {
+            $errors[] = 'Please select a valid disaster event.';
+        }
+
+        $quantity = trim((string)($input['quantity'] ?? ''));
+        if ($quantity === '' || !ctype_digit($quantity) || (int)$quantity < 1) {
+            $errors[] = 'Quantity must be a whole number of 1 or more.';
+        }
+
+        $distributedAt = trim((string)($input['distributed_at'] ?? ''));
+        if ($distributedAt !== '' && strtotime($distributedAt) === false) {
+            $errors[] = 'Distribution date/time is not valid.';
+        }
+
+        if (mb_strlen(trim((string)($input['distributed_by'] ?? ''))) > 100) {
+            $errors[] = 'Distributed by must be 100 characters or fewer.';
+        }
+
+        if (mb_strlen(trim((string)($input['or_number'] ?? ''))) > 30) {
+            $errors[] = 'OR number must be 30 characters or fewer.';
+        }
+
+        return $errors;
+    }
+
+    private function distributionData(array $input) {
+        $distributedAt = trim((string)($input['distributed_at'] ?? ''));
+
+        return [
+            'inventory_id' => (int)$input['inventory_id'],
+            'resident_id' => (int)$input['resident_id'],
+            'disaster_event_id' => (int)$input['disaster_event_id'],
+            'quantity' => (int)$input['quantity'],
+            'distributed_at' => $distributedAt === '' ? date('Y-m-d H:i:s') : date('Y-m-d H:i:s', strtotime($distributedAt)),
+            'distributed_by' => trim((string)($input['distributed_by'] ?? '')) === '' ? null : trim((string)$input['distributed_by']),
+            'or_number' => trim((string)($input['or_number'] ?? '')) === '' ? null : trim((string)$input['or_number']),
+        ];
+    }
+
+    private function findInventoryItem($id, $lock = false) {
+        $sql = "SELECT * FROM relief_inventory WHERE id = ? AND deleted_at IS NULL";
+        if ($lock) {
+            $sql .= " FOR UPDATE";
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([(int)$id]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
+    private function findDistribution($id) {
+        $stmt = $this->db->prepare("SELECT * FROM relief_distributions WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([(int)$id]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
+    private function adjustInventoryStock(array $item, $delta) {
+        $quantity = max(0, (int)$item['quantity'] + (int)$delta);
+        $status = $this->inventoryStatus($quantity, $item['expiry_date'] ?? null);
+
+        $stmt = $this->db->prepare("
+            UPDATE relief_inventory
+            SET quantity = ?, status = ?, updated_at = ?
+            WHERE id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([$quantity, $status, date('Y-m-d H:i:s'), (int)$item['id']]);
+    }
+
+    private function recordExists($table, $id) {
+        $allowed = ['residents', 'disaster_events'];
+        if (!in_array($table, $allowed, true)) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare("SELECT COUNT(*) c FROM {$table} WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([(int)$id]);
+
+        return (int)$stmt->fetch()['c'] > 0;
+    }
+
+    private function isValidDate($value) {
+        $date = \DateTime::createFromFormat('Y-m-d', $value);
+
+        return $date !== false && $date->format('Y-m-d') === $value;
     }
 }

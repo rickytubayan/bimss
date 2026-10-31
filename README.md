@@ -169,7 +169,7 @@ Currently implemented/skeleton:
 | Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update, witness add/edit/delete |
 | Lupon | ✅ KP case workflow: mediation/pangkat/conciliation, hearings, settlements, CFA issuance |
 | Tanod & CCTV | ✅ Tanod roster, duty schedules (JSON member assignments), CCTV camera registry |
-| DRRM | ✅ Disaster event log, RDANA assessments (shelter + effect breakdowns), hazard zone map, relief inventory & distributions |
+| DRRM | ✅ Disaster event log, RDANA assessments (shelter + effect breakdowns), hazard zone map, relief inventory & distribution management (add/edit/delete with stock sync) |
 | Evacuation | ✅ Evacuation centers with status + capacity/utilization, resident check-in/check-out (transactional occupancy) |
 | Assets | ✅ Asset registry (vehicle, equipment, facility, furniture), condition/status tracking, purchase value, maintenance log with cost and next-schedule, total investment |
 | Venue Bookings | ✅ Venue booking registration (resident, schedule, purpose, amount, payment), confirm/cancel workflow with status filtering |
@@ -303,6 +303,10 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 ### 36. Senior & PWD profiles could not be edited or deleted
 **Bug:** The **Registered Profiles** table on `/admin/seniors` was read-only — a mis-entered pension status, allowance, ID number, or resident could not be corrected, and duplicate/stale profiles could not be removed.
 **Fix:** Added **Edit** and **Delete** actions per profile. Edit opens a pre-filled modal (resident, type, pension status, monthly allowance, grocery benefits, ID type/number, OSCA/PWD numbers) and updates the profile through a new `update()` action; the resident list for editing includes inactive residents (labeled) so existing profiles remain editable. Delete soft-deletes the profile. Both actions validate input and reuse the same duplicate-guard as registration, so changing a resident/type to one that already has that profile shows a clear "already has a profile" message instead of a 500.
+
+### 37. Relief inventory and distributions were read-only
+**Bug:** `/admin/drrm/relief` displayed relief inventory and the last 10 distributions, but there was no way to add stock, correct an item, record a distribution, or fix a mistaken record. Older distributions were not manageable at all.
+**Fix:** Added full management to the relief page. Inventory gets an **Add Item** modal plus per-row **Edit**/**Delete** actions; distributions get a **Record Distribution** modal plus per-row **Edit**/**Delete** actions, and the list now shows every distribution instead of only the latest 10. Stock is kept in sync automatically: recording a distribution deducts from the item, editing reconciles the difference (including moving a distribution to a different item), and deleting restores the quantity. Stock changes run inside transactions with `SELECT ... FOR UPDATE`, and insufficient stock is rejected with a clear message. Inventory status is derived automatically (`expired` past the expiry date, `depleted` at zero, otherwise `available`), and an inventory item with existing distributions cannot be deleted until those records are removed. All deletes are soft deletes.
 
 ---
 
