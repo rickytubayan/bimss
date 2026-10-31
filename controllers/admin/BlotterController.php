@@ -135,4 +135,107 @@ class BlotterController extends \Controller {
         flash('success', 'Blotter entry updated.');
         redirect(admin_url('blotter/' . (int)$id));
     }
+
+    public function storeWitness($id) {
+        $this->requireBlotter($id);
+
+        $input = $this->getInput();
+        $name = trim((string)($input['name'] ?? ''));
+
+        if ($name === '') {
+            flash('error', 'Witness name is required.');
+            redirect(admin_url('blotter/' . (int)$id));
+        }
+
+        $contact = trim((string)($input['contact'] ?? ''));
+        $statement = trim((string)($input['statement'] ?? ''));
+
+        $stmt = $this->db->prepare("
+            INSERT INTO blotter_witnesses (blotter_id, name, contact, statement)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            (int)$id,
+            $name,
+            $contact === '' ? null : $contact,
+            $statement === '' ? null : $statement,
+        ]);
+
+        flash('success', 'Witness added.');
+        redirect(admin_url('blotter/' . (int)$id));
+    }
+
+    public function updateWitness($id, $witness_id) {
+        $this->requireBlotter($id);
+        $this->requireWitness($id, $witness_id);
+
+        $input = $this->getInput();
+        $name = trim((string)($input['name'] ?? ''));
+
+        if ($name === '') {
+            flash('error', 'Witness name is required.');
+            redirect(admin_url('blotter/' . (int)$id));
+        }
+
+        $contact = trim((string)($input['contact'] ?? ''));
+        $statement = trim((string)($input['statement'] ?? ''));
+
+        $stmt = $this->db->prepare("
+            UPDATE blotter_witnesses
+            SET name = ?, contact = ?, statement = ?, updated_at = ?
+            WHERE id = ? AND blotter_id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([
+            $name,
+            $contact === '' ? null : $contact,
+            $statement === '' ? null : $statement,
+            date('Y-m-d H:i:s'),
+            (int)$witness_id,
+            (int)$id,
+        ]);
+
+        flash('success', 'Witness updated.');
+        redirect(admin_url('blotter/' . (int)$id));
+    }
+
+    public function deleteWitness($id, $witness_id) {
+        $this->requireBlotter($id);
+        $this->requireWitness($id, $witness_id);
+
+        $stmt = $this->db->prepare("
+            UPDATE blotter_witnesses
+            SET deleted_at = ?, updated_at = ?
+            WHERE id = ? AND blotter_id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s'),
+            (int)$witness_id,
+            (int)$id,
+        ]);
+
+        flash('success', 'Witness removed.');
+        redirect(admin_url('blotter/' . (int)$id));
+    }
+
+    private function requireBlotter($id) {
+        $stmt = $this->db->prepare("SELECT id FROM blotters WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([(int)$id]);
+        if (!$stmt->fetch()) {
+            flash('error', 'Blotter entry not found.');
+            redirect(admin_url('blotter'));
+        }
+    }
+
+    private function requireWitness($blotterId, $witnessId) {
+        $stmt = $this->db->prepare("
+            SELECT id FROM blotter_witnesses
+            WHERE id = ? AND blotter_id = ? AND deleted_at IS NULL
+        ");
+        $stmt->execute([(int)$witnessId, (int)$blotterId]);
+        if (!$stmt->fetch()) {
+            flash('error', 'Witness not found for this blotter entry.');
+            redirect(admin_url('blotter/' . (int)$blotterId));
+        }
+    }
 }

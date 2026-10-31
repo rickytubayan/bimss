@@ -138,6 +138,9 @@ class App {
             $r->post('blotter/store', 'Admin\BlotterController@store');
             $r->get('blotter/{id}', 'Admin\BlotterController@show');
             $r->post('blotter/{id}/update', 'Admin\BlotterController@update');
+            $r->post('blotter/{id}/witnesses/store', 'Admin\BlotterController@storeWitness');
+            $r->post('blotter/{id}/witnesses/{witness_id}/update', 'Admin\BlotterController@updateWitness');
+            $r->post('blotter/{id}/witnesses/{witness_id}/delete', 'Admin\BlotterController@deleteWitness');
 
             $r->get('lupon', 'Admin\KPController@index');
             $r->get('lupon/cases', 'Admin\KPController@cases');

@@ -166,7 +166,7 @@ Currently implemented/skeleton:
 | Tax | ✅ Tax ledger with assessments, status tracking (unpaid/partial/paid/delinquent), payment recording |
 | Health | ✅ Maternal care, immunization, child growth, disease surveillance, program overview |
 | Senior & PWD | ✅ Registry with senior/PWD profiles, pension tracking, benefits, filter views |
-| Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update |
+| Blotter | ✅ Walk-in registration (auto case #), list with status filters, detail + case update, witness add/edit/delete |
 | Lupon | ✅ KP case workflow: mediation/pangkat/conciliation, hearings, settlements, CFA issuance |
 | Tanod & CCTV | ✅ Tanod roster, duty schedules (JSON member assignments), CCTV camera registry |
 | DRRM | ✅ Disaster event log, RDANA assessments (shelter + effect breakdowns), hazard zone map, relief inventory & distributions |
@@ -295,6 +295,10 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 ### 34. Household head could not be assigned or updated
 **Bug:** The household detail page only *displayed* a head and offered no way to set one. `Household::getHead()` also looked up `resident_links` using the household ID as a resident ID and only `parent` relationships, so it almost never resolved a real head.
 **Fix:** Added a nullable `households.head_resident_id` column (indexed, FK to `residents` with `ON DELETE SET NULL`) and replaced `getHead()` with a lookup by that column that also verifies the resident still belongs to the household. The detail page now has a **Household Head** card with a dropdown listing the members assigned to that household and an **Update Head** action; the controller rejects residents who are not members of the same household and supports clearing the head. Moving a resident to another household or deleting them clears the head reference so no stale head remains. The full schema migration includes the new column/constraint for fresh imports.
+
+### 35. Blotter witnesses could not be managed
+**Bug:** A blotter entry's detail page listed witnesses but there was no way to add, edit, or delete them, so a report could not be completed or corrected after filing.
+**Fix:** Added full witness management on `/admin/blotter/{id}`: an **Add Witness** modal and per-witness **Edit**/**Delete** actions (Bootstrap modals) backed by new `storeWitness`, `updateWitness`, and `deleteWitness` controller actions. Witnesses are validated (name required) and scoped to their parent blotter, so a witness from another entry cannot be modified by changing the URL. Deletes are soft deletes. The witnesses card now warns prominently when an entry has none, since a blotter report should always carry at least one witness.
 
 ---
 
