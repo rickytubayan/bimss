@@ -62,5 +62,13 @@
                 The barangay name set here is used as a fallback when linking records (e.g. households, evacuation centers) to the geographic barangay. Settings are saved to <code>config/app.php</code>.
             </div>
         </div>
+        <div class="card shadow-sm mt-3">
+            <div class="card-header d-flex align-items-center"><i class="bi bi-buildings me-2 text-primary"></i>About Us</div>
+            <div class="card-body small text-muted">
+                <p class="mb-0">
+                    This System is design with AI and Tested by An IT Professional. This System is not Final And Will Be Upgrade Depending on the needs for Its Function. And This System is Free and Not For Sale.
+                </p>
+            </div>
+        </div>
     </div>
 </div>
