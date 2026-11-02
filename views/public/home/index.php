@@ -36,11 +36,6 @@
         <span class="service-label"><?= t('view_bulletin') ?></span>
     </a>
 
-    <a href="<?= url('public/map') ?>" class="service-tile" role="listitem" data-read-aloud="<?= t('map') ?>">
-        <div class="service-icon" aria-hidden="true"><i class="bi bi-geo-alt"></i></div>
-        <span class="service-label"><?= t('map') ?></span>
-    </a>
-
     <a href="<?= url('public/transparency') ?>" class="service-tile" role="listitem" data-read-aloud="<?= t('transparency') ?>">
         <div class="service-icon" aria-hidden="true"><i class="bi bi-bar-chart-line"></i></div>
         <span class="service-label"><?= t('transparency') ?></span>

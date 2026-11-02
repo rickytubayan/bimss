@@ -48,7 +48,6 @@ class App {
                 $r->get('blotter', 'Public\BlotterController@index');
                 $r->post('blotter/submit', 'Public\BlotterController@submit');
                 $r->get('bulletin', 'Public\BulletinController@index');
-                $r->get('map', 'Public\MapController@index');
                 $r->get('transparency', 'Public\TransparencyController@index');
             });
         });

@@ -38,7 +38,6 @@
                     <li class="nav-item"><a class="nav-link" href="<?= url('public/documents') ?>"><i class="bi bi-file-earmark-text me-1"></i><?= t('services') ?></a></li>
                     <li class="nav-item"><a class="nav-link" href="<?= url('public/appointments') ?>"><i class="bi bi-calendar-check me-1"></i><?= t('appointments') ?></a></li>
                     <li class="nav-item"><a class="nav-link" href="<?= url('public/bulletin') ?>"><i class="bi bi-megaphone me-1"></i><?= t('bulletin') ?></a></li>
-                    <li class="nav-item"><a class="nav-link" href="<?= url('public/map') ?>"><i class="bi bi-geo-alt me-1"></i><?= t('map') ?></a></li>
                     <li class="nav-item"><a class="nav-link" href="<?= url('public/transparency') ?>"><i class="bi bi-bar-chart-line me-1"></i><?= t('transparency') ?></a></li>
                     <?php if (\Auth::check()): ?>
                         <li class="nav-item dropdown">
@@ -90,7 +89,6 @@
                 </div>
                 <div class="col-md-4 d-flex flex-column gap-1 footer-links">
                     <a class="text-white-50 text-decoration-none" href="<?= url('public/bulletin') ?>"><i class="bi bi-megaphone me-1"></i><?= t('bulletin') ?></a>
-                    <a class="text-white-50 text-decoration-none" href="<?= url('public/map') ?>"><i class="bi bi-geo-alt me-1"></i><?= t('map') ?></a>
                     <a class="text-white-50 text-decoration-none" href="<?= url('public/transparency') ?>"><i class="bi bi-bar-chart-line me-1"></i><?= t('transparency') ?></a>
                 </div>
             </div>
