@@ -178,7 +178,7 @@ Currently implemented/skeleton:
 | Compliance | ✅ Transparency documents (annual budget, income/expenditure, NTA, procurement, awards, collections, reports) with file upload & public posting |
 | Reports | ✅ Annual report (monthly income vs expenses, fund-type breakdowns, service delivery), SOBA (statutory allocations & budgets), budget utilization per fund type |
 | Notifications | ✅ Admin inbox (search/filter/mark read, type & read tabs), broadcast to all/administrator/resident accounts, emergency alerts (severity, purok targeting) with per-user notifications |
-| Settings | ✅ Barangay/general settings (saved to `config/app.php`), user management (list/search/filter, create accounts with role & status) |
+| Settings | ✅ Barangay/general settings (saved to `config/app.php`), user management (list/search/filter, create accounts with role & status, per-user password reset) |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -316,6 +316,10 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 ### 39. Dashboard showed data from too many modules
 **Bug:** The dashboard had grown crowded with panels from every module (blotters, relief, bookings, purok distribution, newest residents), making the overview noisy and hard to scan.
 **Fix:** Narrowed `/admin/dashboard` to the four requested areas — **Overview**, **Services**, **Finance**, and **Health & Welfare**. The stat row now shows active residents, households, pending document requests, appointments today, revenue this month, expenses this month, Senior & PWD profiles, and pregnant women. Detail panels were reduced to recent document requests, a health & welfare snapshot, a revenue-vs-expenses chart for the current year, and recent health programs. All blotter, complaint, relief, booking, purok, and newest-resident panels were removed.
+
+### 40. Users could not reset their own password; admins had no reset function
+**Bug:** `/admin/settings/users` could create accounts but offered no way to reset a forgotten password, and the public `/public/profile` page was still an "Under Construction" stub.
+**Fix:** Added an admin **Reset Password** action per user on `/admin/settings/users` (Bootstrap modal, new password + confirmation, minimum 8 characters) backed by `POST /admin/settings/users/{id}/reset-password`, and a self-service **My Profile** page at `/public/profile` where a signed-in user can view their account details and change their password after verifying the current one (`POST /public/profile/password`). Both flows bcrypt-hash the new password, record a `reset_password` / `change_password` entry in `audit_logs`, and use the existing flash messages and CSRF fields. **My Profile** links were added to both the public account dropdown and the admin user dropdown.
 
 ---
 

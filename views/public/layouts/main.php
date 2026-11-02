@@ -48,6 +48,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow">
                                 <li><a class="dropdown-item" href="<?= $isAdmin ? url('admin/dashboard') : url('public/dashboard') ?>"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                                <li><a class="dropdown-item" href="<?= url('public/profile') ?>"><i class="bi bi-person-gear me-2"></i><?= t('my_profile') ?></a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="<?= url('auth/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i><?= t('logout') ?></a></li>
                             </ul>

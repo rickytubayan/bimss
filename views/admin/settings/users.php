@@ -79,7 +79,7 @@ $statusColors = ['active' => 'badge-green', 'inactive' => 'badge-gray', 'suspend
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead>
-                <tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Created</th></tr>
+                <tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Created</th><th class="text-end">Actions</th></tr>
             </thead>
             <tbody>
                 <?php foreach ($users as $u): ?>
@@ -98,12 +98,54 @@ $statusColors = ['active' => 'badge-green', 'inactive' => 'badge-gray', 'suspend
                         <td><span class="badge rounded-pill <?= $statusColors[$u['status']] ?? 'badge-gray' ?>"><?= ucfirst($u['status']) ?></span></td>
                         <td class="text-muted small text-nowrap"><?= $u['last_login_at'] ? time_ago($u['last_login_at']) : '—' ?></td>
                         <td class="text-muted small text-nowrap"><?= format_date($u['created_at']) ?></td>
+                        <td class="text-end text-nowrap">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#resetPassword<?= (int)$u['id'] ?>" title="Reset password">
+                                <i class="bi bi-key me-1"></i>Reset Password
+                            </button>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if (empty($users)): ?>
-                    <tr><td colspan="6" class="text-center text-muted py-4">No user accounts found.</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted py-4">No user accounts found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
+
+<?php foreach ($users as $u): $uid = (int)$u['id']; ?>
+    <div class="modal fade" id="resetPassword<?= $uid ?>" tabindex="-1" aria-labelledby="resetPasswordLabel<?= $uid ?>" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="<?= admin_url('settings/users/' . $uid . '/reset-password') ?>">
+                    <?= CSRF::field() ?>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resetPasswordLabel<?= $uid ?>"><i class="bi bi-key me-2 text-primary"></i>Reset Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">
+                            Set a new password for <strong><?= e($u['username']) ?></strong> (<?= e($u['email']) ?>).
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label" for="new_password_<?= $uid ?>">New Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="new_password_<?= $uid ?>" name="new_password"
+                                   minlength="8" autocomplete="new-password" required>
+                            <div class="form-text">At least 8 characters.</div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label" for="confirm_password_<?= $uid ?>">Confirm New Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirm_password_<?= $uid ?>" name="confirm_password"
+                                   minlength="8" autocomplete="new-password" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>

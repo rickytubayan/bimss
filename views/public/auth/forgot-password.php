@@ -14,7 +14,8 @@
                     <div>For security, password resets are handled by the barangay office.</div>
                 </div>
 
-                <p class="small mb-2">To reset your password, please:</p>
+                <p class="small mb-2">If you can still sign in and want to change your password, open <a href="<?= url('public/profile') ?>">My Profile</a> after logging in.</p>
+                <p class="small mb-2">If you have forgotten your password, please:</p>
                 <ol class="small text-muted ps-3 mb-4">
                     <li class="mb-1">Visit the barangay hall during office hours.</li>
                     <li class="mb-1">Present a valid ID and the email address registered to your account.</li>

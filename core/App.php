@@ -36,6 +36,7 @@ class App {
             $r->group('public', ['AuthMiddleware'], function ($r) {
                 $r->get('dashboard', 'Public\HomeController@dashboard');
                 $r->get('profile', 'Public\ProfileController@index');
+                $r->post('profile/password', 'Public\ProfileController@updatePassword');
                 $r->get('profile/qr', 'Public\ProfileController@qrCode');
                 $r->get('documents', 'Public\DocumentRequestController@index');
                 $r->post('documents/request', 'Public\DocumentRequestController@request');
@@ -216,6 +217,7 @@ class App {
             $r->get('settings/users', 'Admin\SettingsController@users');
             $r->get('settings/users/create', 'Admin\SettingsController@createUser');
             $r->post('settings/users/store', 'Admin\SettingsController@storeUser');
+            $r->post('settings/users/{id}/reset-password', 'Admin\SettingsController@resetUserPassword');
 
             $r->get('bulletins', 'Admin\BulletinController@index');
             $r->get('bulletins/create', 'Admin\BulletinController@create');

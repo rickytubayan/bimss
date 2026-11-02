@@ -155,4 +155,43 @@ class SettingsController extends \Controller {
         flash('success', 'User account created.');
         redirect(admin_url('settings/users'));
     }
+
+    public function resetUserPassword($id) {
+        $db = $this->db;
+        $input = $this->getInput();
+
+        $stmt = $db->prepare("SELECT id, username, email FROM users WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([(int)$id]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            flash('error', 'User not found.');
+            redirect(admin_url('settings/users'));
+        }
+
+        $password = $input['new_password'] ?? '';
+        $confirm = $input['confirm_password'] ?? '';
+
+        if (strlen($password) < 8) {
+            flash('error', 'Password must be at least 8 characters.');
+            redirect(admin_url('settings/users'));
+        }
+        if ($password !== $confirm) {
+            flash('error', 'Passwords do not match.');
+            redirect(admin_url('settings/users'));
+        }
+
+        $hash = password_hash($password, PASSWORD_BCRYPT);
+        $update = $db->prepare("UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?");
+        $update->execute([$hash, $user['id']]);
+
+        $admin = \Auth::user();
+        $ip = get_client_ip();
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $db->prepare("INSERT INTO audit_logs (user_id, action, table_name, record_id, ip_address, user_agent, created_at) VALUES (?, 'reset_password', 'users', ?, ?, ?, NOW())")
+            ->execute([$admin['id'] ?? null, $user['id'], $ip, $ua]);
+
+        flash('success', 'Password for ' . $user['username'] . ' has been reset.');
+        redirect(admin_url('settings/users'));
+    }
 }

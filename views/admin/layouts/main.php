@@ -100,6 +100,8 @@ function admin_nav_active($uri, $prefix) { return str_contains($uri, $prefix) ? 
                         </span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="<?= url('public/profile') ?>"><i class="bi bi-person-gear me-2"></i>My Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="<?= url('auth/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i><?= t('logout') ?></a></li>
                     </ul>
                 </div>
