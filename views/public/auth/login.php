@@ -29,6 +29,10 @@
                     <button type="submit" class="btn btn-primary w-100 py-2"><i class="bi bi-box-arrow-in-right me-1"></i><?= t('login') ?></button>
                 </form>
 
+                <div class="text-center mt-3">
+                    <a href="<?= url('auth/forgot-password') ?>" class="small text-decoration-none">Forgot password?</a>
+                </div>
+
                 <hr class="my-4">
 
                 <div class="text-center">

@@ -36,6 +36,10 @@ class AuthController extends \Controller {
         $this->viewPublic('auth/register', ['title' => 'Register']);
     }
 
+    public function showForgotPassword() {
+        $this->viewPublic('auth/forgot-password', ['title' => 'Forgot Password']);
+    }
+
     public function register() {
         $data = $this->getInput();
         $validator = new \Validator();

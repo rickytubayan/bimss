@@ -29,6 +29,7 @@ class App {
                 $r->post('login', 'Public\AuthController@login');
                 $r->get('register', 'Public\AuthController@showRegister');
                 $r->post('register', 'Public\AuthController@register');
+                $r->get('forgot-password', 'Public\AuthController@showForgotPassword');
                 $r->get('logout', 'Public\AuthController@logout');
             });
 
