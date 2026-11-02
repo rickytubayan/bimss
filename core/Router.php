@@ -75,7 +75,7 @@ class Router {
         }
 
         http_response_code(404);
-        require VIEWS_PATH . '/errors/404.php';
+        return (new \Controllers\Public\ErrorController())->notFound();
     }
 
     private function buildPattern($path) {
