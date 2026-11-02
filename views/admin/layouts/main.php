@@ -89,7 +89,6 @@ function admin_nav_active($uri, $prefix) { return str_contains($uri, $prefix) ? 
                 <strong class="h5 mb-0"><?= e($title ?? 'Dashboard') ?></strong>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a href="<?= url('') ?>" class="btn btn-outline-primary btn-sm"><i class="bi bi-eye me-1"></i>Public Site</a>
                 <a href="<?= admin_url('notifications') ?>" class="btn btn-outline-secondary btn-sm position-relative" aria-label="Notifications"><i class="bi bi-bell"></i></a>
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button"
@@ -101,8 +100,6 @@ function admin_nav_active($uri, $prefix) { return str_contains($uri, $prefix) ? 
                         </span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><a class="dropdown-item" href="<?= url('') ?>"><i class="bi bi-eye me-2"></i>Public Site</a></li>
-                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="<?= url('auth/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i><?= t('logout') ?></a></li>
                     </ul>
                 </div>
