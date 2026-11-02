@@ -3,11 +3,6 @@
    ============================================================ */
 
 /* Accessibility bar */
-.accessibility-bar {
-    background: #f1f3f4;
-    border-bottom: 1px solid var(--border);
-}
-
 /* Navbar */
 .public-navbar {
     background: var(--bg);

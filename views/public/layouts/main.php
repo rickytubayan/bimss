@@ -15,14 +15,9 @@
     <!-- Custom styles -->
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/public-portal.css') ?>">
-    <link rel="stylesheet" href="<?= asset('css/accessibility.css') ?>" id="accessibility-css">
-    <script src="<?= asset('js/accessibility.js') ?>" defer></script>
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-
-    <?php include VIEWS_PATH . '/components/accessibility-bar.php'; ?>
-
 
     <nav class="navbar navbar-expand-lg public-navbar sticky-top" aria-label="Main navigation">
         <div class="container">

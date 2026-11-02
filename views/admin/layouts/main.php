@@ -15,8 +15,6 @@ function admin_nav_active($uri, $prefix) { return str_contains($uri, $prefix) ? 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/admin.css') ?>">
-    <link rel="stylesheet" href="<?= asset('css/accessibility.css') ?>" id="accessibility-css">
-    <script src="<?= asset('js/accessibility.js') ?>" defer></script>
 </head>
 <body>
 
