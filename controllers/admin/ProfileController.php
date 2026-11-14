@@ -1,5 +1,5 @@
 <?php
-namespace Controllers\Public;
+namespace Controllers\Admin;
 
 class ProfileController extends \Controller {
     public function index() {

@@ -1,5 +1,5 @@
 <?php
-namespace Controllers\Public;
+namespace Controllers\Admin;
 
 class LanguageController extends \Controller {
     private $supported = ['en', 'fil', 'bis', 'ilc', 'bic'];

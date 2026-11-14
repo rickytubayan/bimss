@@ -19,36 +19,36 @@ class App {
 
         // Public routes
         $r->group('', ['CSRFMiddleware'], function ($r) {
-            $r->get('', 'Public\HomeController@index');
-            $r->get('/', 'Public\HomeController@index');
-            $r->get('home', 'Public\HomeController@index');
-            $r->get('api/language/set', 'Public\LanguageController@set');
+            $r->get('', 'Admin\HomeController@index');
+            $r->get('/', 'Admin\HomeController@index');
+            $r->get('home', 'Admin\HomeController@index');
+            $r->get('api/language/set', 'Admin\LanguageController@set');
 
             $r->group('auth', [], function ($r) {
-                $r->get('login', 'Public\AuthController@showLogin');
-                $r->post('login', 'Public\AuthController@login');
-                $r->get('register', 'Public\AuthController@showRegister');
-                $r->post('register', 'Public\AuthController@register');
-                $r->get('forgot-password', 'Public\AuthController@showForgotPassword');
-                $r->get('logout', 'Public\AuthController@logout');
+                $r->get('login', 'Admin\AuthController@showLogin');
+                $r->post('login', 'Admin\AuthController@login');
+                $r->get('register', 'Admin\AuthController@showRegister');
+                $r->post('register', 'Admin\AuthController@register');
+                $r->get('forgot-password', 'Admin\AuthController@showForgotPassword');
+                $r->get('logout', 'Admin\AuthController@logout');
             });
 
             $r->group('public', ['AuthMiddleware'], function ($r) {
-                $r->get('dashboard', 'Public\HomeController@dashboard');
-                $r->get('profile', 'Public\ProfileController@index');
-                $r->post('profile/password', 'Public\ProfileController@updatePassword');
-                $r->get('profile/qr', 'Public\ProfileController@qrCode');
-                $r->get('documents', 'Public\DocumentRequestController@index');
-                $r->post('documents/request', 'Public\DocumentRequestController@request');
-                $r->get('documents/track/{tracking_code}', 'Public\DocumentRequestController@track');
-                $r->get('appointments', 'Public\AppointmentController@index');
-                $r->post('appointments/book', 'Public\AppointmentController@book');
-                $r->get('complaints', 'Public\ComplaintController@index');
-                $r->post('complaints/submit', 'Public\ComplaintController@submit');
-                $r->get('blotter', 'Public\BlotterController@index');
-                $r->post('blotter/submit', 'Public\BlotterController@submit');
-                $r->get('bulletin', 'Public\BulletinController@index');
-                $r->get('transparency', 'Public\TransparencyController@index');
+                $r->get('dashboard', 'Admin\HomeController@dashboard');
+                $r->get('profile', 'Admin\ProfileController@index');
+                $r->post('profile/password', 'Admin\ProfileController@updatePassword');
+                $r->get('profile/qr', 'Admin\ProfileController@qrCode');
+                $r->get('documents', 'Admin\ClearanceController@index');
+                $r->post('documents/request', 'Admin\ClearanceController@create');
+                $r->get('documents/track/{tracking_code}', 'Admin\ClearanceController@index');
+                $r->get('appointments', 'Admin\AppointmentController@index');
+                $r->post('appointments/book', 'Admin\AppointmentController@create');
+                $r->get('complaints', 'Admin\BlotterController@index');
+                $r->post('complaints/submit', 'Admin\BlotterController@store');
+                $r->get('blotter', 'Admin\BlotterController@index');
+                $r->post('blotter/submit', 'Admin\BlotterController@store');
+                $r->get('bulletin', 'Admin\BulletinController@index');
+                $r->get('transparency', 'Admin\ComplianceController@transparency');
             });
         });
 

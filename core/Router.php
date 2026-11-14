@@ -75,7 +75,7 @@ class Router {
         }
 
         http_response_code(404);
-        return (new \Controllers\Public\ErrorController())->notFound();
+        return (new \Controllers\Admin\ErrorController())->notFound();
     }
 
     private function buildPattern($path) {

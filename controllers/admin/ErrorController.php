@@ -1,5 +1,5 @@
 <?php
-namespace Controllers\Public;
+namespace Controllers\Admin;
 
 class ErrorController extends \Controller {
     public function notFound() {

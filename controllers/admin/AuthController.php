@@ -1,5 +1,5 @@
 <?php
-namespace Controllers\Public;
+namespace Controllers\Admin;
 
 class AuthController extends \Controller {
     public function showLogin() {
