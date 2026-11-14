@@ -17,7 +17,7 @@ Built with **vanilla PHP 8 + MySQL/MariaDB** (no frameworks) for easy deployment
 7. [Feature Modules](#feature-modules)
 8. [Database](#database)
 9. [Security](#security)
-10. [Accessibility & Inclusivity](#accessibility--inclusivity)
+10. [Inclusive Design](#inclusive-design)
 11. [Roadmap](#roadmap)
 
 ---
@@ -76,6 +76,8 @@ Single application with two portals, sharing one codebase and database:
 - **Public Portal** — root `/` routes (e.g. `/`, `/auth/login`, `/public/dashboard`)
 - **Admin Backend** — `/admin/*` routes (protected by RBAC)
 
+> The public-facing controllers were moved into `controllers/admin/` while the public side is reworked. All routes currently resolve to `Admin\...` controllers; the views remain under `views/public/`.
+
 Custom MVC pattern with a **front controller** (`index.php`) and a regex-based **Router**.
 
 ```
@@ -101,17 +103,15 @@ BIMSS/
 ├── middleware/            # CSRFMiddleware, AuthMiddleware, RBACMiddleware, AuditMiddleware
 ├── models/                # User, Resident, Household, ... (PDO models)
 ├── controllers/
-│   ├── public/            # Citizen-facing controllers
-│   ├── admin/             # Official backend controllers
+│   ├── admin/             # All controllers (public-facing ones included during rework)
 │   └── api/               # (SMS/webhook endpoints - placeholder)
 ├── views/
 │   ├── public/            # Citizen templates (+ layouts)
 │   ├── admin/             # Official templates (+ layouts)
-│   ├── components/        # Reusable UI (table, pagination, accessibility-bar)
 │   └── errors/            # 404 page
 ├── public/
-│   ├── css/               # main, public-portal, admin, accessibility, kiosk
-│   ├── js/                # app, accessibility, tts, voice
+│   ├── css/               # main, public-portal, admin, kiosk
+│   ├── js/                # app, tts, voice
 │   └── uploads/           # complaints, dana, profiles
 ├── migrations/            # 001_full_schema.sql (84 tables + seed data)
 ├── lang/                  # en, fil, bis, ilc, bic translation files
@@ -128,11 +128,9 @@ Designed for citizens of **all ages** — tech-savvy teens to seniors and PWDs.
 - Picture/tile-based navigation with large icons
 - **Text-to-Speech (TTS)** reads labels & announcements aloud
 - **Voice-to-Text** input for dictation
-- **Font scaling up to 200%**
-- **Dark mode** and **high-contrast** modes
 - **Multilingual**: English, Filipino, Bisaya, Ilocano, Bicolano
 - **Kiosk mode** ready (large touch tiles)
-- Digital resident ID, document requests, tracking, appointments, complaints, blotter, bulletin, map, transparency dashboard
+- Digital resident ID, document requests, tracking, appointments, complaints, blotter, bulletin, transparency dashboard
 
 ### 🛠 Administrative Backend
 Role-based control for barangay officials.
@@ -147,14 +145,14 @@ Role-based control for barangay officials.
 
 ## Feature Modules
 
-Fully planned across **11 modules** (the master data, certificate workflow, finance, health/welfare, peace & order, DRRM, infrastructure/livelihood, admin controls, accessibility, and smart features). The foundation + multiple modules are implemented; the remainder are being built incrementally.
+Fully planned across **11 modules** (the master data, certificate workflow, finance, health/welfare, peace & order, DRRM, infrastructure/livelihood, admin controls, inclusive design, and smart features). The foundation + multiple modules are implemented; the remainder are being built incrementally.
 
 Currently implemented/skeleton:
 
 | Module | Status |
 |--------|--------|
 | Core framework, Auth, RBAC | ✅ Done |
-| Layouts, CSS (Bootstrap 5), accessibility JS | ✅ Done |
+| Layouts, CSS (Bootstrap 5), TTS/voice JS | ✅ Done |
 | Dashboard | ✅ Focused live overview of Overview, Services, Finance, and Health & Welfare: residents/households, pending documents, appointments today, monthly revenue/expenses, Senior & PWD and health counts, recent document requests, health snapshot, revenue-vs-expenses chart, recent health programs |
 | Residents | ✅ Full CRUD (search, filter, pagination, soft delete, full-name search) |
 | Households | ✅ Full CRUD (list, add, edit, show, soft delete, search/filter, assign/change head) |
@@ -178,7 +176,7 @@ Currently implemented/skeleton:
 | Compliance | ✅ Transparency documents (annual budget, income/expenditure, NTA, procurement, awards, collections, reports) with file upload & public posting |
 | Reports | ✅ Annual report (monthly income vs expenses, fund-type breakdowns, service delivery), SOBA (statutory allocations & budgets), budget utilization per fund type |
 | Notifications | ✅ Admin inbox (search/filter/mark read, type & read tabs), broadcast to all/administrator/resident accounts, emergency alerts (severity, purok targeting) with per-user notifications |
-| Settings | ✅ Barangay/general settings (saved to `config/app.php`), user management (list/search/filter, create accounts with role & status, per-user password reset) |
+| Settings | ✅ Barangay/general settings (saved to `config/app.php`), user management (list/search/filter, create accounts with role & status, per-user password reset), About Us card |
 | GIS map, charts, QR, kiosk | 📝 Planned |
 
 ---
@@ -200,7 +198,7 @@ A log of notable bugs found and resolved during development:
 **Fix:** Removed the offending `.htaccess`; static assets now serve correctly.
 
 ### 4. Bootstrap 5 UI redesign (framework adoption)
-The original custom CSS pipeline wasn't loading reliably. The frontend was rebuilt on **Bootstrap 5 + Bootstrap Icons** (CDN) for both the public portal and the admin backend, with the custom CSS reduced to theme overrides. **Dark mode** and **high-contrast** modes (in `accessibility.css`) now override Bootstrap's CSS variables so they work with the new components.
+The original custom CSS pipeline wasn't loading reliably. The frontend was rebuilt on **Bootstrap 5 + Bootstrap Icons** (CDN) for both the public portal and the admin backend, with the custom CSS reduced to theme overrides. The optional accessibility toolbar and its dark/high-contrast stylesheet were later removed.
 
 ### 5. GPS coordinates removed from household forms
 The **GPS Latitude / Longitude** inputs on the household create form were not needed. They were removed across the form (`_form.php`), the field extraction (`HouseholdController`), the model `fillable`, and the detail view (`show.php`).
@@ -321,6 +319,12 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 **Bug:** `/admin/settings/users` could create accounts but offered no way to reset a forgotten password, and the public `/public/profile` page was still an "Under Construction" stub.
 **Fix:** Added an admin **Reset Password** action per user on `/admin/settings/users` (Bootstrap modal, new password + confirmation, minimum 8 characters) backed by `POST /admin/settings/users/{id}/reset-password`, and a self-service **My Profile** page at `/public/profile` where a signed-in user can view their account details and change their password after verifying the current one (`POST /public/profile/password`). Both flows bcrypt-hash the new password, record a `reset_password` / `change_password` entry in `audit_logs`, and use the existing flash messages and CSRF fields. **My Profile** links were added to both the public account dropdown and the admin user dropdown.
 
+### 41. Public controllers consolidated into the admin folder
+The `controllers/public/` folder was cleared ahead of a public-side rework. The controllers still in use (`Auth`, `Home`, `Profile`, `Language`, `Error`) were moved to `controllers/admin/` with the `Controllers\Admin` namespace, and the unused "Under Construction" stubs (`Appointment`, `Blotter`, `Bulletin`, `Complaint`, `DocumentRequest`, `Tracking`, `Transparency`) were removed. Every route in `core/App.php` — plus the router's 404 handler — now points to an `Admin\...` controller: documents → Clearances, appointments → Appointments, complaints/blotter → Blotter, bulletin → Bulletins, transparency → Compliance. The templates remain under `views/public/`, so the public layouts and URLs are unchanged.
+
+### 42. Public map page removed
+The `/public/map` route, `controllers/public/MapController.php`, its navbar and footer links, and its homepage service tile were removed. The URL now returns the styled 404 page.
+
 ---
 
 ## Database
@@ -356,19 +360,16 @@ All seed/reference SQL (`seeds/seed.sql`, `seed_reference.sql`, `seed_health.sql
 
 ---
 
-## Accessibility & Inclusivity
+## Inclusive Design
 
-A core requirement — the system is built for users of all ages and abilities:
+The portal is still built for users of all ages and abilities:
 
 | Feature | Implementation |
 |---------|----------------|
-| Font scaling (to 200%) | CSS `rem`/`--font-scale` + JS toggle |
-| Dark mode | CSS custom properties toggled by attribute |
-| High contrast | Separate stylesheet (WCAG AAA) |
-| Text-to-Speech | Web Speech API, read-aloud buttons |
-| Voice input | Web Speech Recognition on text fields |
+| Text-to-Speech | Web Speech API, read-aloud labels via `tts.js` |
+| Voice input | Web Speech Recognition on text fields via `voice.js` |
 | Keyboard nav | Skip links, focus states, tab order |
-| Language toggle | `lang/` JSON-style PHP files, instant switch |
+| Multilingual content | `lang/` PHP files (English, Filipino, Bisaya, Ilocano, Bicolano) |
 | Kiosk mode | Large tile layout for touchscreens |
 
 ---
@@ -382,7 +383,7 @@ A core requirement — the system is built for users of all ages and abilities:
 - **Phase 6:** Peace & Order (blotter, Lupon/KP full workflow, tanod scheduling, CCTV, visitor logs)
 - **Phase 7:** DRRM (evacuation, RDANA, relief inventory, hazard mapping, emergency alerts)
 - **Phase 8:** Infrastructure & Livelihood (assets, venue bookings, jobs, farmers)
-- **Phase 9:** Full public portal + accessibility polish (GIS map, charts, kiosk)
+- **Phase 9:** Full public portal rebuild (public controllers, GIS map, charts, kiosk)
 - **Phase 10:** Smart features (captain widgets, PDF reports, backups, hardening)
 
 ---
