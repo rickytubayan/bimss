@@ -194,4 +194,42 @@ class SettingsController extends \Controller {
         flash('success', 'Password for ' . $user['username'] . ' has been reset.');
         redirect(admin_url('settings/users'));
     }
+
+    public function deleteUser($id) {
+        $db = $this->db;
+        $id = (int)$id;
+
+        $stmt = $db->prepare("SELECT id, username, role FROM users WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([$id]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            flash('error', 'User not found.');
+            redirect(admin_url('settings/users'));
+        }
+
+        if ($id === (int)\Auth::id()) {
+            flash('error', 'You cannot delete your own account.');
+            redirect(admin_url('settings/users'));
+        }
+
+        if ($user['role'] === 'captain') {
+            $stmt = $db->prepare("SELECT COUNT(*) c FROM users WHERE role = 'captain' AND status = 'active' AND deleted_at IS NULL");
+            $stmt->execute();
+            if ((int)$stmt->fetch()['c'] <= 1) {
+                flash('error', 'The last active captain account cannot be deleted.');
+                redirect(admin_url('settings/users'));
+            }
+        }
+
+        $db->prepare("UPDATE users SET deleted_at = NOW(), status = 'inactive', remember_token = NULL, updated_at = NOW() WHERE id = ?")
+            ->execute([$id]);
+
+        $admin = \Auth::user();
+        $db->prepare("INSERT INTO audit_logs (user_id, action, table_name, record_id, ip_address, user_agent, created_at) VALUES (?, 'delete_user', 'users', ?, ?, ?, NOW())")
+            ->execute([$admin['id'] ?? null, $id, get_client_ip(), $_SERVER['HTTP_USER_AGENT'] ?? '']);
+
+        flash('success', 'User account "' . $user['username'] . '" has been deleted.');
+        redirect(admin_url('settings/users'));
+    }
 }

@@ -11,6 +11,7 @@ $roleColors = [
     'resident' => 'badge-gray',
 ];
 $statusColors = ['active' => 'badge-green', 'inactive' => 'badge-gray', 'suspended' => 'badge-red'];
+$currentUserId = (int)\Auth::id();
 ?>
 <div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-2">
     <div>
@@ -99,10 +100,18 @@ $statusColors = ['active' => 'badge-green', 'inactive' => 'badge-gray', 'suspend
                         <td class="text-muted small text-nowrap"><?= $u['last_login_at'] ? time_ago($u['last_login_at']) : '—' ?></td>
                         <td class="text-muted small text-nowrap"><?= format_date($u['created_at']) ?></td>
                         <td class="text-end text-nowrap">
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                    data-bs-target="#resetPassword<?= (int)$u['id'] ?>" title="Reset password">
-                                <i class="bi bi-key me-1"></i>Reset Password
-                            </button>
+                            <div class="d-flex gap-1 justify-content-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                        data-bs-target="#resetPassword<?= (int)$u['id'] ?>" title="Reset password">
+                                    <i class="bi bi-key me-1"></i>Reset Password
+                                </button>
+                                <?php if ((int)$u['id'] !== $currentUserId): ?>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                            data-bs-target="#deleteUser<?= (int)$u['id'] ?>" title="Delete user">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -148,4 +157,32 @@ $statusColors = ['active' => 'badge-green', 'inactive' => 'badge-gray', 'suspend
             </div>
         </div>
     </div>
+    <?php if ($uid !== $currentUserId): ?>
+        <div class="modal fade" id="deleteUser<?= $uid ?>" tabindex="-1" aria-labelledby="deleteUserLabel<?= $uid ?>" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="<?= admin_url('settings/users/' . $uid . '/delete') ?>">
+                        <?= CSRF::field() ?>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteUserLabel<?= $uid ?>"><i class="bi bi-trash me-2 text-danger"></i>Delete User</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-2">
+                                Delete the account for <strong><?= e($u['username']) ?></strong> (<?= e($u['email']) ?>)?
+                            </p>
+                            <div class="alert alert-warning small mb-0" role="alert">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                The user will no longer be able to sign in. The account and its records are kept in the database.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Delete User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 <?php endforeach; ?>

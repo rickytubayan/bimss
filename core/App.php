@@ -217,6 +217,7 @@ class App {
             $r->get('settings/users/create', 'Admin\SettingsController@createUser');
             $r->post('settings/users/store', 'Admin\SettingsController@storeUser');
             $r->post('settings/users/{id}/reset-password', 'Admin\SettingsController@resetUserPassword');
+            $r->post('settings/users/{id}/delete', 'Admin\SettingsController@deleteUser');
 
             $r->get('bulletins', 'Admin\BulletinController@index');
             $r->get('bulletins/create', 'Admin\BulletinController@create');
